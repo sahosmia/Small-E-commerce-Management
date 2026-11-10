@@ -1,9 +1,6 @@
 <?php
 
-use App\Models\User;
-use Database\Seeders\ChartOfAccountSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 /*
@@ -21,7 +18,6 @@ pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
     ->beforeEach(function () {
         $this->withoutVite();
-        $this->seed(ChartOfAccountSeeder::class);
     })
     ->in('Feature');
 
@@ -39,29 +35,3 @@ pest()->extend(TestCase::class)
 expect()->extend('toBeOne', function () {
     return $this->toBe(1);
 });
-
-/*
-|--------------------------------------------------------------------------
-| Functions
-|--------------------------------------------------------------------------
-|
-| While Pest is very powerful out-of-the-box, you may have some testing code specific to your
-| project that you don't want to repeat in every file. Here you can also expose helpers as
-| global functions to help you to reduce the number of lines of code in your test files.
-|
-*/
-
-/**
- * A user with just the given permissions — for tests against routes gated
- * by `permission:` middleware or manual `can()` checks (Phase 18), without
- * needing to run the full RolePermissionSeeder.
- *
- * @param  list<string>  $permissions
- */
-function userWithPermissions(array $permissions): User
-{
-    $user = User::factory()->create();
-    $user->syncPermissions(array_map(fn (string $name) => Permission::findOrCreate($name), $permissions));
-
-    return $user;
-}

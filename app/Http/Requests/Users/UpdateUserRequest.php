@@ -30,7 +30,6 @@ class UpdateUserRequest extends FormRequest
             'username' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z0-9_.-]+$/', Rule::unique('users', 'username')->ignore($user->id)],
             // Blank leaves the password unchanged — only validated/hashed when provided.
             'password' => ['nullable', 'string', Password::defaults()],
-            'role' => ['required', 'string', 'exists:roles,name'],
             'is_active' => ['boolean'],
         ];
     }

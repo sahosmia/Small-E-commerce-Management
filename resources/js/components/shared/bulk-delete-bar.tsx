@@ -14,8 +14,8 @@ interface BulkDeleteBarProps {
     routeName: string;
     /** Plural noun for the texts, e.g. `'products'`. */
     noun: string;
-    /** The `module.delete` permission — the bar is not offered without it. */
-    permission: string;
+    /** Optional permission for backwards compatibility. */
+    permission?: string;
 }
 
 /**
@@ -28,7 +28,7 @@ export default function BulkDeleteBar({ selection, routeName, noun, permission }
     const [open, setOpen] = useState(false);
     const [processing, setProcessing] = useState(false);
 
-    if (!auth.permissions.includes(permission)) {
+    if (permission && auth?.permissions && !auth.permissions.includes(permission)) {
         return null;
     }
 

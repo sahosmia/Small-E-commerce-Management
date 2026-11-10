@@ -9,7 +9,7 @@ use App\Http\Controllers\Reports\TrendingProductsController;
 use App\Http\Controllers\Reports\TrialBalanceController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'module:report'])->prefix('reports')->name('reports.')->group(function () {
+Route::middleware(['auth'])->prefix('reports')->name('reports.')->group(function () {
     Route::get('profit-loss', ProfitLossController::class)->name('profit-loss');
     Route::get('balance-sheet', BalanceSheetController::class)->name('balance-sheet');
     Route::get('trial-balance', TrialBalanceController::class)->name('trial-balance');
@@ -18,9 +18,5 @@ Route::middleware(['auth', 'module:report'])->prefix('reports')->name('reports.'
     Route::redirect('stock', '/products', 301)->name('stock');
     Route::get('due', DueReportController::class)->name('due');
     Route::get('trending-products', TrendingProductsController::class)->name('trending-products');
+    Route::get('financial-position', FinancialPositionController::class)->name('financial-position');
 });
-
-// Its own dedicated permission (not the general `report.view` every report
-// above shares) — see FinancialPositionController's docblock.
-Route::middleware(['auth', 'module:financial_position'])
-    ->get('reports/financial-position', FinancialPositionController::class)->name('reports.financial-position');

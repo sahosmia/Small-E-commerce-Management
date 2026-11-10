@@ -5,9 +5,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\Shops\ShopController;
 use App\Http\Controllers\ThemeColorController;
-use Illuminate\Support\Facades\Route;
-
 use App\Models\Shop;
+use Illuminate\Support\Facades\Route;
 
 // Public customer landing page showing active shops
 Route::get('/', function () {
@@ -48,5 +47,4 @@ Route::middleware(['auth'])->group(function () {
 require __DIR__.'/inventory.php';
 
 require __DIR__.'/global-search.php';
-require __DIR__.'/roles.php';
 require __DIR__.'/auth.php';

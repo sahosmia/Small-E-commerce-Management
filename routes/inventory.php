@@ -9,7 +9,7 @@ use App\Http\Controllers\Products\StockAdjustmentController;
 use App\Http\Controllers\Products\UnitController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'module:product'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::resource('categories', CategoryController::class)
         ->only(['index', 'store', 'update', 'destroy']);
 
@@ -27,9 +27,7 @@ Route::middleware(['auth', 'module:product'])->group(function () {
     Route::get('products/{product}/in-stock-serials', [StockAdjustmentController::class, 'serials'])->name('products.in-stock-serials');
     Route::post('products/{product}/stock-adjustments', [StockAdjustmentController::class, 'store'])
         ->name('stock-adjustments.store');
-});
 
-// Its own group: inside the module's group a POST would also demand the "create" permission.
-Route::middleware(['auth', 'module:product,delete'])
-    ->post('products/bulk-delete', [ProductController::class, 'bulkDestroy'])
-    ->name('products.bulk-delete');
+    Route::post('products/bulk-delete', [ProductController::class, 'bulkDestroy'])
+        ->name('products.bulk-delete');
+});

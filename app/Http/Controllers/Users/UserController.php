@@ -13,29 +13,14 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    /**
-     * The one role every install starts with — matches `RoleController::
-     * PROTECTED_ROLE`. Duplicated as a literal rather than shared, the same
-     * way the seeder and tests already treat 'Admin' as a fixed name.
-     */
-    private const PROTECTED_ROLE = 'Admin';
-
-    /**
-     * Lives on the same "Roles & Permissions" page as role management —
-     * `RoleController::index()` supplies the `users` list this acts on.
-     */
     public function store(StoreUserRequest $request): RedirectResponse
     {
         $data = $request->validated();
-        $role = $data['role'];
-        unset($data['role']);
 
-        $user = User::create([
+        User::create([
             ...$data,
             'password' => Hash::make($data['password']),
         ]);
-
-        $user->assignRole($role);
 
         return back();
     }
@@ -43,12 +28,6 @@ class UserController extends Controller
     public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
         $data = $request->validated();
-        $role = $data['role'];
-        unset($data['role']);
-
-        if ($request->user()->id === $user->id && $user->hasRole(self::PROTECTED_ROLE) && $role !== self::PROTECTED_ROLE) {
-            return back()->withErrors(['role' => 'You cannot remove your own Admin role.']);
-        }
 
         if (empty($data['password'])) {
             unset($data['password']);
@@ -57,7 +36,6 @@ class UserController extends Controller
         }
 
         $user->update($data);
-        $user->syncRoles([$role]);
 
         return back();
     }

@@ -40,13 +40,6 @@ class GlobalSearchController extends Controller
                 ->get(['id', 'name', 'sku', 'selling_price']);
         }
 
-     
-
-    
-      
-
-    
-
         return response()->json([
             // Products/Expenses have no dedicated "show" page (Phase 6/11 kept
             // them list+modal/edit only) — link to the closest equivalent.
@@ -57,8 +50,7 @@ class GlobalSearchController extends Controller
                 'amount' => $product->selling_price,
                 'url' => route('products.edit', $product),
             ]),
-       
-           
+
         ]);
     }
 }

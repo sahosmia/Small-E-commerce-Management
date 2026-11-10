@@ -18,7 +18,7 @@ export interface QuickActionDefinition {
     label: string;
     icon: LucideIcon;
     /** The `module.action` permission needed — an action the user can't perform is never offered. */
-    permission: string;
+    permission?: string;
     /** Resolved lazily: Ziggy's `route()` is only available once the app has booted. */
     href: () => string;
 }
@@ -36,7 +36,7 @@ export interface QuickActionSetting {
  */
 export const QUICK_ACTIONS: QuickActionDefinition[] = [
    
-    { key: 'add_product', label: 'Add Product', icon: Package, permission: 'product.create', href: () => route('products.create') },
+    { key: 'add_product', label: 'Add Product', icon: Package, href: () => route('products.create') },
    
 ];
 
@@ -59,10 +59,10 @@ export function buildEffectiveQuickActions(saved: QuickActionSetting[] | null | 
     return [...kept, ...missing];
 }
 
-/** The actions the switcher should actually show this user: switched on by the admin AND permitted. */
-export function resolveQuickActions(saved: QuickActionSetting[] | null | undefined, permissions: string[]): QuickActionDefinition[] {
+/** The actions the switcher should actually show this user. */
+export function resolveQuickActions(saved: QuickActionSetting[] | null | undefined, _permissions?: string[]): QuickActionDefinition[] {
     return buildEffectiveQuickActions(saved)
         .filter((item) => item.enabled)
         .map((item) => QUICK_ACTIONS_BY_KEY.get(item.key))
-        .filter((action): action is QuickActionDefinition => action !== undefined && permissions.includes(action.permission));
+        .filter((action): action is QuickActionDefinition => action !== undefined);
 }
