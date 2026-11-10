@@ -255,15 +255,7 @@ export default function Dashboard({
                         {salesOrders && <SalesOrdersWidget salesOrders={salesOrders} />}
                         {followUps && <FollowUpsWidget followUps={followUps} />}
 
-                        {showFigures && (
-                            <PanelCard>
-                                <BestSellersPurchasesWidget
-                                    bestSellers={bestSellers}
-                                    purchases={recentTransactions.purchases}
-                                    period={bestSellersPeriod}
-                                />
-                            </PanelCard>
-                        )}
+                        
                     </section>
                 </div>
             </div>

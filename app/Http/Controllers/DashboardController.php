@@ -114,70 +114,13 @@ class DashboardController extends Controller
         $totalPurchaseReturn = (float) PurchaseReturn::query()->whereBetween('return_date', [$from, $to])->sum('total_amount');
         $totalExpense = (float) Expense::query()->whereBetween('expense_date', [$from, $to])->sum('total_amount');
 
-        $recentSales = Sale::query()
-            ->with('customer:id,name')
-            ->latest('sale_date')
-            ->latest('id')
-            ->take(5)
-            ->get()
-            ->map(fn (Sale $s) => [
-                'id' => $s->id,
-                'invoice_no' => $s->invoice_no,
-                'party_name' => $s->customer?->name ?? 'Walk-in Customer',
-                'amount' => (float) $s->total_amount,
-                'status' => $s->status->value,
-                'date' => $s->sale_date->toDateString(),
-                'href' => route('sales.show', $s->id),
-            ]);
+    
 
-        $recentPurchases = Purchase::query()
-            ->with('supplier:id,name')
-            ->whereBetween('purchase_date', [$periodFrom, $periodTo])
-            ->latest('purchase_date')
-            ->latest('id')
-            ->take(5)
-            ->get()
-            ->map(fn (Purchase $p) => [
-                'id' => $p->id,
-                'invoice_no' => $p->purchase_no,
-                'party_name' => $p->supplier?->name ?? 'N/A',
-                'amount' => (float) $p->total_amount,
-                'status' => $p->status->value,
-                'date' => $p->purchase_date->toDateString(),
-                'href' => route('purchases.show', $p->id),
-            ]);
+   
 
-        $recentExpenses = Expense::query()
-            ->with('category:id,name')
-            ->latest('expense_date')
-            ->latest('id')
-            ->take(5)
-            ->get()
-            ->map(fn (Expense $e) => [
-                'id' => $e->id,
-                'invoice_no' => $e->expense_no,
-                'party_name' => $e->category?->name ?? 'General',
-                'amount' => (float) $e->total_amount,
-                'status' => 'completed',
-                'date' => $e->expense_date->toDateString(),
-                'href' => route('expenses.index'),
-            ]);
+        
 
-        $bestSellers = SaleItem::query()
-            ->whereHas('sale', fn ($q) => $q->where('status', SaleStatus::Confirmed)->whereBetween('sale_date', [$periodFrom, $periodTo]))
-            ->with('product:id,name,sku')
-            ->selectRaw('product_id, SUM(quantity) as total_qty, SUM(subtotal) as total_amount')
-            ->groupBy('product_id')
-            ->orderByDesc('total_qty')
-            ->take(5)
-            ->get()
-            ->map(fn ($item) => [
-                'id' => $item->product_id,
-                'name' => $item->product?->name ?? 'Unknown',
-                'sku' => $item->product?->sku ?? '',
-                'quantity' => (float) $item->total_qty,
-                'total_amount' => (float) $item->total_amount,
-            ]);
+    
 
         // Shop-wide money figures (sales, purchases, expenses, cash and bank, what is owed) are for people who may read
         // reports. A cashier still gets the low-stock list, their follow-ups and the shortcuts, but not the shop's totals.
@@ -189,19 +132,12 @@ class DashboardController extends Controller
             'salesCurrentFiscalYear' => $showFigures ? $this->salesCurrentFiscalYear() : [],
             'monthlyRevenueVsExpense' => $showFigures ? $this->monthlyRevenueVsExpense() : [],
             'quickActions' => [
-                ['label' => __('dashboard.new_sale'), 'href' => route('sales.create')],
-                ['label' => __('dashboard.new_purchase'), 'href' => route('purchases.create')],
-                ['label' => __('dashboard.collect_due'), 'href' => route('contacts.index', ['type' => 'customer'])],
-                ['label' => __('dashboard.pay_due'), 'href' => route('contacts.index', ['type' => 'supplier'])],
-                ['label' => __('dashboard.new_expense'), 'href' => route('expenses.index')],
-                ['label' => __('dashboard.new_contact'), 'href' => route('contacts.index')],
             ],
             'range' => [
                 'preset' => $preset->value,
                 'from' => $from->toDateString(),
                 'to' => $to->toDateString(),
             ],
-            'bestSellersPeriod' => $period,
             'metrics' => ! $showFigures ? null : [
                 'totalSales' => round($totalSales, 2),
                 'netSales' => round($totalSales - $totalSellReturn, 2),
@@ -230,10 +166,7 @@ class DashboardController extends Controller
             'salesOrders' => $request->user()?->canAny(['sale.view_all', 'sale.view_own']) ? OpenSalesOrders::get() : null,
             // The nightly books check's verdict; only people who may read reports see it.
             'booksCheck' => $request->user()?->can('report.view') ? Cache::get(CheckReconciliation::LAST_RUN_CACHE_KEY) : null,
-            'recentTransactions' => $showFigures
-                ? ['sales' => $recentSales, 'purchases' => $recentPurchases, 'expenses' => $recentExpenses]
-                : ['sales' => [], 'purchases' => [], 'expenses' => []],
-            'bestSellers' => $showFigures ? $bestSellers : [],
+           
         ]);
     }
 

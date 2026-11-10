@@ -27,40 +27,14 @@ interface QuickCreateGroup {
 // `useEffect`). Built inside the component, not at module scope, since it calls Ziggy's `route()`.
 function buildGroups(): QuickCreateGroup[] {
     return [
-        {
-            heading: 'Contacts',
-            items: [
-                { label: 'New Customer', icon: UserPlus, href: route('contacts.index', { type: 'customer', quick_create: '1' }) },
-                { label: 'New Supplier', icon: UserPlus, href: route('contacts.index', { type: 'supplier', quick_create: '1' }) },
-            ],
-        },
-        {
-            heading: 'Sales & Purchases',
-            items: [
-                { label: 'New Sale', icon: Receipt, href: route('sales.create') },
-                { label: 'New Purchase', icon: ShoppingBag, href: route('purchases.create') },
-                { label: 'New Sales Order', icon: ClipboardList, href: route('sales-orders.create') },
-            ],
-        },
-        {
-            heading: 'Returns & Service',
-            items: [
-                { label: 'New Sale Return', icon: RotateCcw, href: route('sale-returns.create') },
-                { label: 'New Purchase Return', icon: Undo2, href: route('purchase-returns.create') },
-                { label: 'New Service', icon: Wrench, href: route('service-requests.create') },
-            ],
-        },
+        
+       
+      
         {
             heading: 'Catalog',
             items: [{ label: 'New Product', icon: Package, href: route('products.create') }],
         },
-        {
-            heading: 'Finance',
-            items: [
-                { label: 'New Expense', icon: Wallet, href: route('expenses.index', { quick_create: '1' }) },
-                { label: 'New Asset', icon: Boxes, href: route('assets.index', { quick_create: '1' }) },
-            ],
-        },
+       
     ];
 }
 

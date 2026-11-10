@@ -35,47 +35,9 @@ export interface QuickActionSetting {
  * modal on arrival through `?quick_create=1` (the same trick the header's Quick Create menu uses).
  */
 export const QUICK_ACTIONS: QuickActionDefinition[] = [
-    { key: 'add_sale', label: 'Add Sale', icon: Receipt, permission: 'sale.create', href: () => route('sales.create') },
-    { key: 'add_purchase', label: 'Add Purchase', icon: ShoppingBag, permission: 'purchase.create', href: () => route('purchases.create') },
-    {
-        key: 'add_contact',
-        label: 'Add Contact',
-        icon: UserPlus,
-        permission: 'contact.create',
-        href: () => route('contacts.index', { quick_create: '1' }),
-    },
+   
     { key: 'add_product', label: 'Add Product', icon: Package, permission: 'product.create', href: () => route('products.create') },
-    {
-        key: 'add_expense',
-        label: 'Add Expense',
-        icon: Wallet,
-        permission: 'expense.create',
-        href: () => route('expenses.index', { quick_create: '1' }),
-    },
-    {
-        key: 'add_other_income',
-        label: 'Add Other Income',
-        icon: HandCoins,
-        permission: 'expense.create',
-        href: () => route('other-income.index', { quick_create: '1' }),
-    },
-    { key: 'add_sales_order', label: 'Add Sales Order', icon: ClipboardList, permission: 'sale.create', href: () => route('sales-orders.create') },
-    {
-        key: 'add_asset',
-        label: 'Add Asset',
-        icon: Boxes,
-        permission: 'asset.create',
-        href: () => route('assets.index', { quick_create: '1' }),
-    },
-    { key: 'add_service', label: 'Add Service', icon: Wrench, permission: 'service.create', href: () => route('service-requests.create') },
-    { key: 'add_sale_return', label: 'Add Sale Return', icon: RotateCcw, permission: 'sale.create', href: () => route('sale-returns.create') },
-    {
-        key: 'add_purchase_return',
-        label: 'Add Purchase Return',
-        icon: Undo2,
-        permission: 'purchase.create',
-        href: () => route('purchase-returns.create'),
-    },
+   
 ];
 
 /** On until an admin says otherwise — the extra actions stay off by default so the switcher starts short. */

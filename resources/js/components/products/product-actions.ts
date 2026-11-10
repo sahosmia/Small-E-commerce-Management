@@ -11,9 +11,6 @@ interface ProductActionHandlers {
 export function getProductActions(product: ProductListItem, { onAdjustStock, onDelete }: ProductActionHandlers): RowAction[] {
     return [
         { label: 'View Details', icon: Eye, href: route('products.show', product.id) },
-        { label: 'Adjust Stock', icon: SlidersHorizontal, onClick: () => onAdjustStock(product), hidden: !product.manage_stock },
-        { label: 'Add Purchase', icon: ShoppingCart, href: route('purchases.create', { product_id: product.id }), hidden: !product.manage_stock },
-        { label: 'Add Sale', icon: ShoppingBag, href: route('sales.create', { product_id: product.id }), hidden: !product.is_for_sale },
         { label: 'Edit', icon: Pencil, href: route('products.edit', product.id) },
         { label: 'Delete', icon: Trash2, variant: 'destructive', separatorBefore: true, onClick: () => onDelete(product) },
     ];
