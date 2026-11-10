@@ -4,8 +4,6 @@ namespace App\Providers;
 
 use App\Models\Purchase;
 use App\Models\Sale;
-use App\View\Composers\AppearanceComposer;
-use App\View\Composers\ThemeColorComposer;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
@@ -20,8 +18,6 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        View::composer('app', ThemeColorComposer::class);
-        View::composer('app', AppearanceComposer::class);
 
         $this->scopeRecordsToTheirOwner();
     }
