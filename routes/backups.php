@@ -1,0 +1,12 @@
+<?php
+
+use App\Http\Controllers\BackupController;
+use Illuminate\Support\Facades\Route;
+
+Route::middleware(['auth', 'permission:backup.manage'])->group(function () {
+    Route::get('backups', [BackupController::class, 'index'])->name('backups.index');
+    Route::post('backups', [BackupController::class, 'store'])->name('backups.store');
+    Route::get('backups/{filename}/download', [BackupController::class, 'download'])->name('backups.download');
+    Route::post('backups/{filename}/restore', [BackupController::class, 'restore'])->name('backups.restore');
+    Route::delete('backups/{filename}', [BackupController::class, 'destroy'])->name('backups.destroy');
+});

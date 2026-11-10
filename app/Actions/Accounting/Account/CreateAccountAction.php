@@ -1,0 +1,98 @@
+<?php
+
+namespace App\Actions\Accounting\Account;
+
+use App\Enums\AccountTransactionType;
+use App\Enums\ChartOfAccountType;
+use App\Enums\NormalBalance;
+use App\Models\Account;
+use App\Models\AccountType;
+use App\Models\ChartOfAccount;
+use App\Services\AccountService;
+use App\Services\ChartOfAccountResolver;
+use App\Services\JournalService;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
+class CreateAccountAction
+{
+    public function __construct(
+        private AccountService $accounts,
+        private JournalService $journal,
+        private ChartOfAccountResolver $chartOfAccounts,
+    ) {}
+
+    /**
+     * @param  array{name: string, account_type_id?: int|string|null, account_sub_type?: string|null, account_number?: string|null, opening_balance?: float|string|null, is_default?: bool}  $data
+     */
+    public function execute(array $data): Account
+    {
+        return DB::transaction(function () use ($data) {
+            $openingBalance = (float) ($data['opening_balance'] ?? 0);
+            $isDefault = (bool) ($data['is_default'] ?? false);
+            $accountTypeId = ! empty($data['account_type_id']) ? (int) $data['account_type_id'] : null;
+            $accountType = $accountTypeId ? AccountType::find($accountTypeId) : null;
+            $chartOfAccount = $this->createSubAccount($accountType, $data['name']);
+
+            // Only one account can be the default — unset it everywhere else
+            // before this one claims it.
+            if ($isDefault) {
+                Account::query()->where('is_default', true)->update(['is_default' => false]);
+            }
+
+            $account = Account::create([
+                'name' => $data['name'],
+                'account_type_id' => $accountType?->id,
+                'account_sub_type' => $data['account_sub_type'] ?? null,
+                'account_number' => $data['account_number'] ?? null,
+                'opening_balance' => $openingBalance,
+                'is_default' => $isDefault,
+                'created_by' => Auth::id(),
+                'chart_of_account_id' => $chartOfAccount->id,
+            ]);
+
+            if ($openingBalance !== 0.0) {
+                $this->accounts->record(
+                    $account,
+                    AccountTransactionType::OpeningBalance,
+                    $openingBalance,
+                    today(),
+                );
+
+                $this->journal->postOpeningBalance(
+                    today(),
+                    $chartOfAccount,
+                    $this->chartOfAccounts->code('3300'),
+                    $openingBalance,
+                    'account_opening_balance',
+                    $account->id,
+                    "Opening balance: {$account->name}",
+                );
+            }
+
+            return $account;
+        });
+    }
+
+    /**
+     * Every Cash/Bank/Mobile Banking/Cheque account gets its own General
+     * Ledger sub-account, auto-created under the right parent — Cash-type
+     * accounts under 1010, everything else under 1020 — never manually
+     * picked by whoever creates the account.
+     */
+    private function createSubAccount(?AccountType $accountType, string $name): ChartOfAccount
+    {
+        $parentCode = ($accountType && $accountType->isProtected()) ? '1010' : '1020';
+        $parent = ChartOfAccount::query()
+            ->where('code', $parentCode)
+            ->firstOrFail();
+
+        return ChartOfAccount::create([
+            'code' => $this->chartOfAccounts->nextChildCode($parent),
+            'name' => $name,
+            'type' => ChartOfAccountType::Asset,
+            'normal_balance' => NormalBalance::Debit,
+            'parent_id' => $parent->id,
+        ]);
+    }
+}

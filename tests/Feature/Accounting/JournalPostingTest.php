@@ -1,0 +1,373 @@
+<?php
+
+use App\Actions\Purchases\Purchase\ConfirmPurchaseAction;
+use App\Actions\Sales\Sale\ConfirmSaleAction;
+use App\Models\Account;
+use App\Models\AccountType;
+use App\Models\Category;
+use App\Models\ChartOfAccount;
+use App\Models\Contact;
+use App\Models\JournalEntry;
+use App\Models\Product;
+use App\Models\Purchase;
+use App\Models\Sale;
+use App\Models\Settings;
+use App\Models\Unit;
+use App\Models\User;
+
+beforeEach(function () {
+    Settings::factory()->create();
+    $this->seed(ChartOfAccountSeeder::class);
+});
+
+test('creating an account with an opening balance posts a balanced journal entry against Opening Balance Equity', function () {
+    $this->actingAs(User::factory()->create());
+    $type = AccountType::factory()->create(['name' => 'Cash']);
+
+    $this->post('/accounts', [
+        'name' => 'City Bank',
+        'account_type_id' => $type->id,
+        'opening_balance' => 5000,
+    ])->assertRedirect('/accounts');
+
+    $account = Account::query()->firstOrFail();
+    $equity = ChartOfAccount::where('code', '3300')->firstOrFail();
+    $entry = JournalEntry::where('reference_type', 'account_opening_balance')->where('reference_id', $account->id)->firstOrFail();
+
+    expect($entry->lines->sum('debit'))->toBe($entry->lines->sum('credit'))
+        ->and($account->chartOfAccount->fresh()->balance)->toBe(5000.0)
+        ->and($equity->fresh()->balance)->toBe(5000.0);
+});
+
+test('correcting an account opening balance reverses the original journal entry and posts a fresh one', function () {
+    $this->actingAs(User::factory()->create());
+    $type = AccountType::factory()->create();
+
+    $this->post('/accounts', [
+        'name' => 'City Bank',
+        'account_type_id' => $type->id,
+        'opening_balance' => 5000,
+    ]);
+
+    $account = Account::query()->firstOrFail();
+    $original = JournalEntry::where('reference_type', 'account_opening_balance')->where('reference_id', $account->id)->firstOrFail();
+
+    $this->patch("/accounts/{$account->id}", [
+        'name' => $account->name,
+        'account_type_id' => $type->id,
+        'opening_balance' => 7000,
+        'is_active' => true,
+    ])->assertRedirect('/accounts');
+
+    $equity = ChartOfAccount::where('code', '3300')->firstOrFail();
+
+    expect($original->fresh()->status->value)->toBe('reversed')
+        ->and($account->chartOfAccount->fresh()->balance)->toBe(7000.0)
+        ->and($equity->fresh()->balance)->toBe(7000.0)
+        ->and(JournalEntry::where('reference_type', 'account_opening_balance')->where('reference_id', $account->id)->count())->toBe(2);
+});
+
+test('creating a contact with a positive opening balance debits Accounts Receivable', function () {
+    $this->actingAs(User::factory()->create());
+
+    $this->post('/contacts', [
+        'name' => 'Verify Customer',
+        'first_name' => 'Verify',
+        'last_name' => 'Customer',
+        'phone' => '01700000000',
+        'type' => 'customer',
+        'entity_type' => 'individual',
+        'is_active' => true,
+        'opening_balance' => 500,
+    ])->assertRedirect();
+
+    $contact = Contact::query()->firstOrFail();
+    $receivable = ChartOfAccount::where('code', '1100')->firstOrFail();
+    $equity = ChartOfAccount::where('code', '3300')->firstOrFail();
+    $entry = JournalEntry::where('reference_type', 'contact_opening_balance')->where('reference_id', $contact->id)->firstOrFail();
+
+    expect($entry->lines->sum('debit'))->toBe($entry->lines->sum('credit'))
+        ->and($receivable->fresh()->balance)->toBe(500.0)
+        ->and($equity->fresh()->balance)->toBe(500.0);
+});
+
+test('creating a contact with a negative opening balance credits Accounts Payable', function () {
+    $this->actingAs(User::factory()->create());
+
+    $this->post('/contacts', [
+        'name' => 'Verify Supplier',
+        'first_name' => 'Verify',
+        'last_name' => 'Supplier',
+        'phone' => '01700000001',
+        'type' => 'supplier',
+        'entity_type' => 'individual',
+        'is_active' => true,
+        'opening_balance' => -300,
+    ])->assertRedirect();
+
+    $contact = Contact::query()->firstOrFail();
+    $payable = ChartOfAccount::where('code', '2100')->firstOrFail();
+    $equity = ChartOfAccount::where('code', '3300')->firstOrFail();
+    $entry = JournalEntry::where('reference_type', 'contact_opening_balance')->where('reference_id', $contact->id)->firstOrFail();
+
+    expect($entry->lines->sum('debit'))->toBe($entry->lines->sum('credit'))
+        ->and($payable->fresh()->balance)->toBe(300.0)
+        ->and($equity->fresh()->balance)->toBe(-300.0);
+});
+
+test('creating a product with an opening stock posts a balanced journal entry against Opening Balance Equity', function () {
+    $this->actingAs(User::factory()->create());
+    $category = Category::factory()->create();
+    $unit = Unit::factory()->create();
+
+    $this->post('/products', [
+        'name' => 'Reconciliation Test Fridge',
+        'sku' => 'RECON-FRIDGE-1',
+        'category_id' => $category->id,
+        'unit_id' => $unit->id,
+        'selling_price' => 45000,
+        'manage_stock' => true,
+        'is_for_sale' => true,
+        'is_active' => true,
+        'has_installation_service' => false,
+        'emi_available' => false,
+        'track_serial_number' => false,
+        'opening_stock' => 10,
+        'opening_stock_cost' => 32000,
+    ])->assertRedirect('/products');
+
+    $product = Product::query()->where('sku', 'RECON-FRIDGE-1')->firstOrFail();
+    $inventory = ChartOfAccount::where('code', '1200')->firstOrFail();
+    $equity = ChartOfAccount::where('code', '3300')->firstOrFail();
+    $entry = JournalEntry::where('reference_type', 'product_opening_stock')->where('reference_id', $product->id)->firstOrFail();
+
+    expect($entry->lines->sum('debit'))->toBe($entry->lines->sum('credit'))
+        ->and($inventory->fresh()->balance)->toBe(320000.0)
+        ->and($equity->fresh()->balance)->toBe(320000.0);
+});
+
+test('confirming a sale posts a balanced journal entry with a receivable/revenue pair and a COGS/inventory pair', function () {
+    $this->actingAs(User::factory()->create());
+    $customer = Contact::factory()->create();
+    $product = Product::factory()->create(['selling_price' => 1000, 'current_stock' => 5, 'avg_cost' => 600]);
+    $sale = Sale::factory()->create(['customer_id' => $customer->id]);
+    $sale->items()->create(['product_id' => $product->id, 'quantity' => 2, 'unit_price' => 1000, 'original_price' => 1000, 'subtotal' => 2000]);
+    $sale->forceFill(['total_amount' => 2000, 'due_amount' => 2000])->save();
+
+    $this->post("/sales/{$sale->id}/confirm", [])->assertRedirect();
+
+    $entry = JournalEntry::query()->where('reference_type', 'sale')->where('reference_id', $sale->id)->firstOrFail();
+    $totalDebit = $entry->lines->sum('debit');
+    $totalCredit = $entry->lines->sum('credit');
+
+    $receivable = ChartOfAccount::where('code', '1100')->first();
+    $revenue = ChartOfAccount::where('code', '4100')->first();
+    $cogs = ChartOfAccount::where('code', '5100')->first();
+    $inventory = ChartOfAccount::where('code', '1200')->first();
+
+    expect($totalDebit)->toBe($totalCredit)
+        ->and($totalDebit)->toBe(3200.0) // 2000 (AR) + 1200 (COGS: 2 * 600)
+        ->and($receivable->fresh()->balance)->toBe(2000.0)
+        ->and($revenue->fresh()->balance)->toBe(2000.0)
+        ->and($cogs->fresh()->balance)->toBe(1200.0)
+        ->and($inventory->fresh()->balance)->toBe(-1200.0);
+});
+
+test('confirming a purchase posts a balanced journal entry debiting inventory and crediting payable', function () {
+    $this->actingAs(User::factory()->create());
+    $supplier = Contact::factory()->supplier()->create();
+    $product = Product::factory()->create(['current_stock' => 0]);
+    $purchase = Purchase::factory()->create(['supplier_id' => $supplier->id]);
+    $purchase->items()->create(['product_id' => $product->id, 'quantity' => 10, 'unit_price' => 100, 'original_price' => 100, 'subtotal' => 1000]);
+    $purchase->forceFill(['total_amount' => 1000, 'due_amount' => 1000])->save();
+
+    $this->post("/purchases/{$purchase->id}/confirm", [])->assertRedirect();
+
+    $entry = JournalEntry::query()->where('reference_type', 'purchase')->where('reference_id', $purchase->id)->firstOrFail();
+    $totalDebit = $entry->lines->sum('debit');
+    $totalCredit = $entry->lines->sum('credit');
+
+    $inventory = ChartOfAccount::where('code', '1200')->first();
+    $payable = ChartOfAccount::where('code', '2100')->first();
+
+    expect($totalDebit)->toBe($totalCredit)
+        ->and($totalDebit)->toBe(1000.0)
+        ->and($inventory->fresh()->balance)->toBe(1000.0)
+        ->and($payable->fresh()->balance)->toBe(1000.0);
+});
+
+test('confirming a purchase with a cash payment adds a balanced payable/cash pair to the same entry', function () {
+    $this->actingAs(User::factory()->create());
+    $supplier = Contact::factory()->supplier()->create();
+    $product = Product::factory()->create(['current_stock' => 0]);
+    $cashType = AccountType::factory()->create(['name' => 'Cash']);
+    $cash = Account::factory()->create(['account_type_id' => $cashType->id, 'current_balance' => 1000]);
+    $purchase = Purchase::factory()->create(['supplier_id' => $supplier->id]);
+    $purchase->items()->create(['product_id' => $product->id, 'quantity' => 5, 'unit_price' => 100, 'original_price' => 100, 'subtotal' => 500]);
+    $purchase->forceFill(['total_amount' => 500, 'due_amount' => 500])->save();
+
+    $this->post("/purchases/{$purchase->id}/confirm", [
+        'payments' => [['account_id' => $cash->id, 'amount' => 200]],
+    ])->assertRedirect();
+
+    $entry = JournalEntry::query()->where('reference_type', 'purchase')->where('reference_id', $purchase->id)->firstOrFail();
+
+    $payable = ChartOfAccount::where('code', '2100')->first();
+
+    expect($entry->lines->sum('debit'))->toBe($entry->lines->sum('credit'))
+        ->and($cash->chartOfAccount->fresh()->balance)->toBe(-200.0)
+        ->and($payable->fresh()->balance)->toBe(300.0); // 500 - 200
+});
+
+test('calling ConfirmSaleAction on an already-confirmed sale is a no-op — no duplicate journal entry', function () {
+    $this->actingAs(User::factory()->create());
+    $customer = Contact::factory()->create();
+    $product = Product::factory()->create(['selling_price' => 1000, 'current_stock' => 5, 'avg_cost' => 600]);
+    $sale = Sale::factory()->create(['customer_id' => $customer->id]);
+    $sale->items()->create(['product_id' => $product->id, 'quantity' => 2, 'unit_price' => 1000, 'original_price' => 1000, 'subtotal' => 2000]);
+    $sale->forceFill(['total_amount' => 2000, 'due_amount' => 2000])->save();
+
+    $confirmed = app(ConfirmSaleAction::class)->execute($sale);
+    app(ConfirmSaleAction::class)->execute($confirmed->fresh());
+
+    expect(JournalEntry::query()->where('reference_type', 'sale')->where('reference_id', $sale->id)->count())->toBe(1)
+        ->and($product->fresh()->current_stock)->toBe(3.0);
+});
+
+test('calling ConfirmPurchaseAction on an already-received purchase is a no-op — no duplicate journal entry', function () {
+    $this->actingAs(User::factory()->create());
+    $supplier = Contact::factory()->supplier()->create();
+    $product = Product::factory()->create(['current_stock' => 0]);
+    $purchase = Purchase::factory()->create(['supplier_id' => $supplier->id]);
+    $purchase->items()->create(['product_id' => $product->id, 'quantity' => 10, 'unit_price' => 100, 'original_price' => 100, 'subtotal' => 1000]);
+    $purchase->forceFill(['total_amount' => 1000, 'due_amount' => 1000])->save();
+
+    $received = app(ConfirmPurchaseAction::class)->execute($purchase);
+    app(ConfirmPurchaseAction::class)->execute($received->fresh());
+
+    expect(JournalEntry::query()->where('reference_type', 'purchase')->where('reference_id', $purchase->id)->count())->toBe(1)
+        ->and($product->fresh()->current_stock)->toBe(10.0);
+});
+
+test('cancelling a confirmed sale reverses its journal entry', function () {
+    $this->actingAs(User::factory()->create());
+    $customer = Contact::factory()->create();
+    $product = Product::factory()->create(['current_stock' => 10, 'selling_price' => 100, 'avg_cost' => 60]);
+    $sale = Sale::factory()->create(['customer_id' => $customer->id]);
+    $sale->items()->create(['product_id' => $product->id, 'quantity' => 3, 'unit_price' => 100, 'original_price' => 100, 'subtotal' => 300]);
+    $sale->forceFill(['total_amount' => 300, 'due_amount' => 300])->save();
+
+    $this->post("/sales/{$sale->id}/confirm", []);
+    $original = JournalEntry::where('reference_type', 'sale')->where('reference_id', $sale->id)->firstOrFail();
+
+    $this->post("/sales/{$sale->id}/cancel")->assertRedirect();
+
+    $reversal = JournalEntry::where('reversal_of_id', $original->id)->first();
+
+    expect($original->fresh()->status->value)->toBe('reversed')
+        ->and($reversal)->not->toBeNull()
+        ->and($reversal->lines->sum('debit'))->toBe($reversal->lines->sum('credit'));
+
+    $receivable = ChartOfAccount::where('code', '1100')->firstOrFail();
+    $revenue = ChartOfAccount::where('code', '4100')->firstOrFail();
+
+    expect($receivable->fresh()->balance)->toBe(0.0)
+        ->and($revenue->fresh()->balance)->toBe(0.0);
+});
+
+test('adding a payment to an already-confirmed sale posts its own balanced journal entry', function () {
+    $this->actingAs(User::factory()->create());
+    $customer = Contact::factory()->create();
+    $product = Product::factory()->create(['current_stock' => 5, 'selling_price' => 100]);
+    $accountType = AccountType::factory()->create();
+    $account = Account::factory()->create(['account_type_id' => $accountType->id, 'current_balance' => 0]);
+
+    $sale = Sale::factory()->create(['customer_id' => $customer->id]);
+    $sale->items()->create(['product_id' => $product->id, 'quantity' => 2, 'unit_price' => 100, 'original_price' => 100, 'subtotal' => 200]);
+    $sale->forceFill(['total_amount' => 200, 'due_amount' => 200])->save();
+    $this->post("/sales/{$sale->id}/confirm", []);
+
+    $this->post("/sales/{$sale->id}/payments", ['payments' => [['account_id' => $account->id, 'amount' => 200]]])->assertRedirect();
+
+    $entries = JournalEntry::where('reference_type', 'sale')->where('reference_id', $sale->id)->get();
+    $paymentEntry = $entries->last();
+
+    expect($entries)->toHaveCount(2)
+        ->and($paymentEntry->lines->sum('debit'))->toBe($paymentEntry->lines->sum('credit'));
+
+    $receivable = ChartOfAccount::where('code', '1100')->firstOrFail();
+    expect($receivable->fresh()->balance)->toBe(0.0)
+        ->and($account->chartOfAccount->fresh()->balance)->toBe(200.0);
+});
+
+test('adding a payment to an already-received purchase posts its own balanced journal entry', function () {
+    $this->actingAs(User::factory()->create());
+    $supplier = Contact::factory()->supplier()->create();
+    $product = Product::factory()->create(['current_stock' => 0]);
+    $accountType = AccountType::factory()->create();
+    $account = Account::factory()->create(['account_type_id' => $accountType->id, 'current_balance' => 1000]);
+
+    $purchase = Purchase::factory()->create(['supplier_id' => $supplier->id]);
+    $purchase->items()->create(['product_id' => $product->id, 'quantity' => 10, 'unit_price' => 100, 'original_price' => 100, 'subtotal' => 1000]);
+    $purchase->forceFill(['total_amount' => 1000, 'due_amount' => 1000])->save();
+    $this->post("/purchases/{$purchase->id}/confirm", []);
+
+    $this->post("/purchases/{$purchase->id}/payments", ['payments' => [['account_id' => $account->id, 'amount' => 1000]]])->assertRedirect();
+
+    $entries = JournalEntry::where('reference_type', 'purchase')->where('reference_id', $purchase->id)->get();
+    $paymentEntry = $entries->last();
+
+    expect($entries)->toHaveCount(2)
+        ->and($paymentEntry->lines->sum('debit'))->toBe($paymentEntry->lines->sum('credit'));
+
+    // The account's own GL sub-account starts fresh at 0 regardless of its
+    // subsidiary current_balance — paying out 1000 credits it to -1000.
+    $payable = ChartOfAccount::where('code', '2100')->firstOrFail();
+    expect($payable->fresh()->balance)->toBe(0.0)
+        ->and($account->chartOfAccount->fresh()->balance)->toBe(-1000.0);
+});
+
+test('cancelling a sale reverses both its confirm-time entry and a later payment entry', function () {
+    $this->actingAs(User::factory()->create());
+    $customer = Contact::factory()->create();
+    $product = Product::factory()->create(['current_stock' => 5, 'selling_price' => 100, 'avg_cost' => 60]);
+    $accountType = AccountType::factory()->create();
+    $account = Account::factory()->create(['account_type_id' => $accountType->id, 'current_balance' => 0]);
+
+    $sale = Sale::factory()->create(['customer_id' => $customer->id]);
+    $sale->items()->create(['product_id' => $product->id, 'quantity' => 2, 'unit_price' => 100, 'original_price' => 100, 'subtotal' => 200]);
+    $sale->forceFill(['total_amount' => 200, 'due_amount' => 200])->save();
+    $this->post("/sales/{$sale->id}/confirm", []);
+    $this->post("/sales/{$sale->id}/payments", ['payments' => [['account_id' => $account->id, 'amount' => 200]]]);
+
+    $this->post("/sales/{$sale->id}/cancel")->assertRedirect();
+
+    $postedCount = JournalEntry::where('reference_type', 'sale')->where('reference_id', $sale->id)->where('status', 'posted')->count();
+    expect($postedCount)->toBe(0);
+
+    $receivable = ChartOfAccount::where('code', '1100')->firstOrFail();
+    expect($receivable->fresh()->balance)->toBe(0.0)
+        ->and($account->chartOfAccount->fresh()->balance)->toBe(0.0);
+});
+
+test('a fund transfer posts a balanced journal entry between the two accounts', function () {
+    $this->actingAs(User::factory()->create());
+    $cashType = AccountType::factory()->create(['name' => 'Cash']);
+    $bankType = AccountType::factory()->create(['name' => 'Bank']);
+    $cash = Account::factory()->create(['account_type_id' => $cashType->id, 'current_balance' => 5000]);
+    $bank = Account::factory()->create(['account_type_id' => $bankType->id, 'current_balance' => 0]);
+
+    $this->post('/fund-transfers', [
+        'from_account_id' => $cash->id,
+        'to_account_id' => $bank->id,
+        'amount' => 1500,
+        'transfer_date' => '2026-03-01',
+    ])->assertRedirect();
+
+    $entry = JournalEntry::query()->where('reference_type', 'fund_transfer')->firstOrFail();
+
+    expect($entry->lines->sum('debit'))->toBe($entry->lines->sum('credit'))
+        ->and($entry->lines->sum('debit'))->toBe(1500.0)
+        ->and($cash->chartOfAccount->fresh()->balance)->toBe(-1500.0)
+        ->and($bank->chartOfAccount->fresh()->balance)->toBe(1500.0);
+});

@@ -1,0 +1,30 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\Settings;
+use Illuminate\Database\Seeder;
+
+class SettingsSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        Settings::query()->firstOrCreate([], [
+            'shop_name' => 'RS Electronics',
+            'currency_symbol' => '৳',
+            'invoice_prefix' => 'INV-',
+            'invoice_next_number' => 1,
+            'purchase_prefix' => 'PUR-',
+            'purchase_next_number' => 1,
+            'sales_order_prefix' => 'SO-',
+            'sales_order_next_number' => 1,
+            'thermal_printer_enabled' => false,
+            'emi_module_enabled' => true,
+            'serial_number_module_enabled' => true,
+            'fiscal_year_start_month' => 7,
+        ]);
+    }
+}

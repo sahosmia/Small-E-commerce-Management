@@ -1,0 +1,1402 @@
+export interface Settings {
+    id: number;
+    shop_name: string;
+    shop_logo: string | null;
+    shop_logo_url: string | null;
+    shop_logo_small_url: string | null;
+    favicon_url: string | null;
+    shop_address: string | null;
+    shop_phone: string | null;
+    currency_symbol: string;
+    invoice_prefix: string;
+    invoice_next_number: number;
+    purchase_prefix: string;
+    purchase_next_number: number;
+    thermal_printer_enabled: boolean;
+    emi_module_enabled: boolean;
+    serial_number_module_enabled: boolean;
+    fiscal_year_start_month: number;
+    pagination_per_page_options: number[];
+    pagination_default_per_page: number;
+    pagination_allow_all: boolean;
+    activity_log_retention_months: number;
+    sms_enabled: boolean;
+    sms_gateway_url: string | null;
+    sms_http_method: string;
+    sms_api_key_set: boolean;
+    sms_auth_mode: string;
+    sms_sender_id: string | null;
+    sms_api_key_param: string | null;
+    sms_sender_param: string | null;
+    sms_phone_param: string;
+    sms_message_param: string;
+    sms_extra_params: string | null;
+    sms_phone_format: string;
+    sms_success_text: string | null;
+    theme_color: string;
+    menu_order: { top: string[]; sub: Record<string, string[]> } | null;
+    quick_actions: { key: string; enabled: boolean }[] | null;
+}
+
+export interface InvoiceSettingsConfig {
+    general: { title: string; subtitle: string; show_number: boolean; show_date: boolean; show_due_date: boolean };
+    branding: { show_logo: boolean };
+    business: { show_name: boolean; show_address: boolean; show_phone: boolean };
+    customer: { show_name: boolean; show_phone: boolean; show_email: boolean; show_address: boolean };
+    items: { show_sku: boolean; show_unit: boolean; show_discount: boolean };
+    totals: { show_discount: boolean; show_paid: boolean; show_due: boolean };
+    terms: { enabled: boolean; items: string[] };
+    footer: { enabled: boolean; text: string };
+}
+
+export interface InvoiceShopInfo {
+    name: string;
+    address: string | null;
+    phone: string | null;
+}
+
+export interface AccountType {
+    id: number;
+    name: string;
+}
+
+export interface AccountTypeListItem extends AccountType {
+    accounts_count: number;
+    is_protected: boolean;
+    can_delete: boolean;
+}
+
+export interface Account {
+    id: number;
+    name: string;
+    account_type: AccountType | null;
+    account_sub_type: string | null;
+    current_balance: number;
+    is_active: boolean;
+    is_default: boolean;
+}
+
+export interface AccountListItem {
+    id: number;
+    name: string;
+    account_type_id: number | null;
+    account_type: AccountType | null;
+    account_sub_type: string | null;
+    account_number: string | null;
+    opening_balance: number;
+    current_balance: number;
+    is_active: boolean;
+    is_default: boolean;
+    can_delete: boolean;
+    /** Opening balance locks as soon as any other movement is recorded. */
+    can_edit_opening_balance: boolean;
+}
+
+export interface StatementRow {
+    id: number;
+    type: string;
+    amount: number;
+    operation_date: string;
+    note: string | null;
+    reference_type: string | null;
+    reference_id: number | null;
+    balance: number;
+    added_by: string | null;
+}
+
+export interface ActivityLogChange {
+    field: string;
+    old: string | null;
+    new: string | null;
+}
+
+export interface ActivityLogEntry {
+    id: number;
+    created_at: string | null;
+    user: string | null;
+    event: string;
+    record_type: string;
+    record: string;
+    changes: ActivityLogChange[];
+    more_changes: number;
+    ip_address: string | null;
+}
+
+export interface Paginated<T> {
+    data: T[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number | null;
+    to: number | null;
+    prev_page_url: string | null;
+    next_page_url: string | null;
+}
+
+export interface Category {
+    id: number;
+    name: string;
+    parent_id: number | null;
+}
+
+export interface CategoryListItem {
+    id: number;
+    name: string;
+    parent_id: number | null;
+    description: string | null;
+    parent: { id: number; name: string } | null;
+    can_delete: boolean;
+}
+
+export interface Unit {
+    id: number;
+    name: string;
+    short_name?: string | null;
+    description?: string | null;
+}
+
+export interface UnitListItem {
+    id: number;
+    name: string;
+    short_name: string | null;
+    description: string | null;
+    can_delete: boolean;
+}
+
+export interface Brand {
+    id: number;
+    name: string;
+    description?: string | null;
+}
+
+export interface BrandListItem {
+    id: number;
+    name: string;
+    description: string | null;
+    can_delete: boolean;
+}
+
+export type StockStatus = 'in_stock' | 'low_stock' | 'out_of_stock';
+
+export interface ProductListItem {
+    id: number;
+    name: string;
+    sku: string;
+    barcode: string | null;
+    category: { id: number; name: string } | null;
+    brand: { id: number; name: string } | null;
+    unit: { id: number; name: string };
+    avg_cost: number;
+    selling_price: number;
+    current_stock: number;
+    minimum_stock_level: number;
+    stock_status: StockStatus;
+    profit_margin: number;
+    manage_stock: boolean;
+    is_for_sale: boolean;
+    is_active: boolean;
+    can_set_opening_stock: boolean;
+    /** Adjusted unit by unit (serials gone / found) instead of by a counted quantity. */
+    track_serial_number: boolean;
+    image_url: string | null;
+}
+
+export interface ProductDetail {
+    id: number;
+    name: string;
+    sku: string;
+    barcode: string | null;
+    category_id: number | null;
+    brand_id: number | null;
+    unit_id: number;
+    selling_price: number;
+    minimum_stock_level: number;
+    manage_stock: boolean;
+    is_for_sale: boolean;
+    is_active: boolean;
+    warranty_period_months: number | null;
+    has_installation_service: boolean;
+    emi_available: boolean;
+    track_serial_number: boolean;
+    current_stock: number;
+    can_set_opening_stock: boolean;
+    image_url: string | null;
+    service_plan: ServicePlanPeriod[];
+}
+
+export interface ServicePlanPeriod {
+    period_months: number;
+    free_quota: number;
+}
+
+export type ContactType = 'customer' | 'supplier' | 'both';
+export type ContactEntityType = 'individual' | 'business';
+export type ContactPrefixValue = 'mr' | 'mrs' | 'ms' | 'dr' | 'mx';
+export type MessageChannel = 'sms' | 'whatsapp' | 'email';
+
+export interface CustomerGroup {
+    id: number;
+    name: string;
+}
+
+export interface CustomerGroupListItem {
+    id: number;
+    name: string;
+    contacts_count: number;
+    can_delete: boolean;
+}
+
+/**
+ * The structured-identity fields the Contact create/edit modal captures —
+ * shared by `ContactListItem` (the primary "open for edit" source, on the
+ * list page) and `ContactDetail` (the contact show page, which can also
+ * open the same modal). `name` stays the single always-populated identity
+ * field; these are additional structure the backend composes it from.
+ * `display_name` (business_name when set, else name) is the one to render
+ * as the primary label — see the Contact model's `display_name` accessor.
+ */
+interface ContactProfileFields {
+    prefix: ContactPrefixValue | null;
+    first_name: string | null;
+    middle_name: string | null;
+    last_name: string | null;
+    contact_code: string | null;
+    phone_alternate: string | null;
+    reference: string | null;
+}
+
+export interface ContactListItem extends ContactProfileFields {
+    id: number;
+    name: string;
+    display_name: string;
+    phone: string;
+    email: string | null;
+    address: string | null;
+    shipping_address: string | null;
+    type: ContactType;
+    entity_type: ContactEntityType;
+    business_name: string | null;
+    customer_group_id: number | null;
+    customer_group: { id: number; name: string } | null;
+    balance: number;
+    balance_label: string;
+    is_active: boolean;
+    can_delete: boolean;
+    can_set_opening_balance: boolean;
+}
+
+export interface ContactDetail extends ContactProfileFields {
+    id: number;
+    name: string;
+    display_name: string;
+    phone: string;
+    email: string | null;
+    address: string | null;
+    shipping_address: string | null;
+    type: ContactType;
+    entity_type: ContactEntityType;
+    business_name: string | null;
+    customer_group_id: number | null;
+    customer_group: { id: number; name: string } | null;
+    balance: number;
+    balance_label: string;
+    is_active: boolean;
+    can_set_opening_balance: boolean;
+}
+
+export interface ContactLedgerLineItem {
+    product: string;
+    quantity: number;
+    unit_price: number;
+    subtotal: number;
+}
+
+export interface ContactLedgerEntry {
+    id: number;
+    type: string;
+    amount: number;
+    note: string | null;
+    reference_type: string | null;
+    reference_id: number | null;
+    /** e.g. the sale/purchase invoice number, sales order number, expense category, or account name — resolved server-side from `reference_type`/`reference_id`. */
+    reference_label: string | null;
+    /** Product line items for sale/purchase/return/sales-order entries — empty for payments, opening balance, adjustments, etc. */
+    items: ContactLedgerLineItem[];
+    created_at: string;
+    balance: number;
+}
+
+export interface ContactDocument {
+    id: number;
+    name: string;
+    file_name: string;
+    size: number;
+    url: string;
+    created_at: string;
+}
+
+export type PurchaseStatusValue = 'draft' | 'ordered' | 'received' | 'cancelled';
+export type PaymentStatusValue = 'due' | 'partial' | 'paid';
+
+export interface PurchaseListItem {
+    /** Name of the user who added this — filled in automatically from who was logged in. */
+    added_by: string | null;
+    id: number;
+    invoice_no: string;
+    supplier: { id: number; name: string };
+    purchase_date: string;
+    created_at?: string;
+    total_amount: number;
+    paid_amount: number;
+    due_amount: number;
+    payment_status: PaymentStatusValue;
+    status: PurchaseStatusValue;
+    can_edit: boolean;
+    /** A received purchase that can still be edited (taken out and received again). */
+    can_amend: boolean;
+}
+
+/** Index signature needed so this array satisfies Inertia's FormDataConvertible constraint in useForm(). */
+export interface PurchaseFormItem {
+    [key: string]: number | string | null | undefined;
+    product_id: number;
+    quantity: number;
+    original_price?: number;
+    unit_price: number;
+    discount_type?: 'flat' | 'percentage' | null;
+    discount_value?: number;
+}
+
+export interface PurchaseFormDetail {
+    id: number;
+    invoice_no: string;
+    supplier_id: number;
+    purchase_date: string;
+    status: PurchaseStatusValue;
+    /** Already paid on earlier saves — what the form adds comes on top. */
+    paid_amount?: number;
+    discount_type?: 'flat' | 'percentage' | null;
+    discount_value?: number;
+    items: PurchaseFormItem[];
+    /** True when a Received purchase is being amended: the receipt is taken out and the corrected one received on save. */
+    amending?: boolean;
+    /** Amending only: what was paid out, per account — the starting payment rows. */
+    payments?: { account_id: number; amount: number }[];
+    /** Amending only: the serials of each line (keyed by line position). */
+    serial_numbers?: Record<number, string[]>;
+}
+
+/** Matches `ProductSearchController`'s response shape (doc/corrections2.md #8) — same for a search result or an edit form's already-picked product. */
+export interface PurchaseProductOption {
+    id: number;
+    name: string;
+    sku: string;
+    barcode: string | null;
+    selling_price: number;
+    avg_cost: number;
+    current_stock: number;
+    track_serial_number: boolean;
+    has_installation_service: boolean;
+}
+
+/** Matches `ContactSearchController`'s response shape. */
+export interface SupplierOption {
+    id: number;
+    name: string;
+    display_name: string;
+    phone: string | null;
+    business_name: string | null;
+    balance: number;
+}
+
+export interface PurchaseItemDetail {
+    id: number;
+    product: { id: number; name: string; sku: string; track_serial_number: boolean };
+    quantity: number;
+    original_price?: number;
+    unit_price: number;
+    discount_type?: 'flat' | 'percentage' | null;
+    discount_value?: number;
+    discount_amount?: number;
+    subtotal: number;
+}
+
+export interface PurchaseDetail {
+    id: number;
+    invoice_no: string;
+    created_at?: string | null;
+    supplier: { id: number; name: string; phone: string; balance: number };
+    creator?: { id: number; name: string } | null;
+    purchase_date: string;
+    subtotal?: number;
+    discount_type?: 'flat' | 'percentage' | null;
+    discount_value?: number;
+    discount_amount?: number;
+    total_amount: number;
+    paid_amount: number;
+    due_amount: number;
+    payment_status: PaymentStatusValue;
+    status: PurchaseStatusValue;
+    can_edit: boolean;
+    can_amend: boolean;
+    /** The price alone can be corrected (units untouched), even when some of the goods are sold. */
+    can_adjust_cost?: boolean;
+    items: PurchaseItemDetail[];
+}
+
+export type SaleStatusValue = 'draft' | 'quotation' | 'confirmed' | 'cancelled';
+export type SaleSourceValue = 'manual' | 'imported';
+
+export interface SaleListItem {
+    /** Name of the user who added this — filled in automatically from who was logged in. */
+    added_by: string | null;
+    id: number;
+    invoice_no: string;
+    customer: { id: number; name: string; phone?: string | null };
+    sale_date: string;
+    created_at?: string;
+    total_amount: number;
+    due_amount: number;
+    payment_status: PaymentStatusValue;
+    status: SaleStatusValue;
+    source: SaleSourceValue;
+    can_edit: boolean;
+    /** A confirmed sale that can still be edited (reversed and recorded again). */
+    can_amend: boolean;
+}
+
+/** Index signature needed so this array satisfies Inertia's FormDataConvertible constraint in useForm(). */
+export interface SaleFormItem {
+    [key: string]: number | string | boolean | string[] | null | undefined;
+    product_id: number;
+    quantity: number;
+    /** The editable per-line base price a discount is computed against — defaults to the product's catalog price, but can be overridden per sale. */
+    original_price: number;
+    unit_price: number;
+    discount_type: 'flat' | 'percentage' | null;
+    discount_value: number;
+    installation_required: boolean;
+    installation_charge: number | null;
+    /** Whether this line is paid in installments (true) or paid now with the rest of the invoice (false). */
+    emi_financed: boolean;
+    /** Warranty on this line in months (0 = none); starts as the product's own and is fixed once the sale is confirmed. */
+    warranty_months: number;
+    /** Whether the product's service plan is copied onto this line. */
+    service_plan_included: boolean;
+    note: string | null;
+    serial_numbers: string[];
+}
+
+export interface SaleFormDetail {
+    id: number;
+    /** True when a Confirmed sale is being amended: it is reversed and recorded again on save. */
+    amending?: boolean;
+    /** Amending only: what was received, per account — the starting payment rows. */
+    payments?: { account_id: number; amount: number }[];
+    invoice_no: string;
+    customer_id: number;
+    sale_date: string;
+    status: SaleStatusValue;
+    discount_type: 'flat' | 'percentage' | null;
+    discount_value: number;
+    valid_until: string | null;
+    financing_type: 'one_time' | 'emi';
+    installment_count: number | null;
+    emi_interest_method: 'none' | 'flat' | 'reducing' | null;
+    emi_annual_rate: number | null;
+    emi_tenure_value: number | null;
+    emi_tenure_unit: 'days' | 'weeks' | 'months' | 'years' | null;
+    emi_frequency: 'weekly' | 'monthly' | 'quarterly' | null;
+    emi_installation_upfront: boolean;
+    items: SaleFormItem[];
+}
+
+export type EmiInstallmentStatusValue = 'pending' | 'paid' | 'overdue' | 'cancelled';
+
+export interface EmiInstallmentListItem {
+    id: number;
+    invoice_no: string;
+    customer: { id: number; name: string; phone?: string | null };
+    installment_number: number;
+    due_date: string;
+    amount: number;
+    paid_amount: number;
+    status: EmiInstallmentStatusValue;
+}
+
+export interface SaleItemDetail {
+    id: number;
+    product: { id: number; name: string; sku: string; unit: { id: number; name: string } | null };
+    quantity: number;
+    original_price: number;
+    unit_price: number;
+    discount_type: 'flat' | 'percentage' | null;
+    discount_value: number;
+    discount_amount: number;
+    subtotal: number;
+    installation_required: boolean;
+    installation_charge: number | null;
+    emi_financed: boolean;
+    warranty_months: number | null;
+    warranty_expires_at: string | null;
+    serial_numbers: string[];
+    /** Each serial of the line with its current status (sold, returned, …). */
+    serials: { serial_number: string; status: string }[];
+}
+
+export interface SaleDetail {
+    id: number;
+    invoice_no: string;
+    customer: { id: number; name: string; phone: string; email: string | null; address: string | null; balance: number };
+    creator?: { id: number; name: string } | null;
+    sale_date: string;
+    subtotal: number;
+    /** Installation charges billed on top of the goods (outside the discount). */
+    installation_amount: number;
+    discount_type: 'flat' | 'percentage' | null;
+    discount_value: number;
+    discount_amount: number;
+    total_amount: number;
+    paid_amount: number;
+    waived_amount: number;
+    due_amount: number;
+    payment_status: PaymentStatusValue;
+    status: SaleStatusValue;
+    source: SaleSourceValue;
+    can_edit: boolean;
+    /** A confirmed sale that can still be edited (reversed and recorded again). */
+    can_amend: boolean;
+    payment_history: SalePaymentHistoryEntry[];
+    /** The installment plan, for a sale on EMI that has been confirmed; null otherwise. */
+    emi: SaleEmiDetail | null;
+    items: SaleItemDetail[];
+}
+
+export interface SaleEmiInstallment {
+    id: number;
+    number: number;
+    due_date: string;
+    amount: number;
+    principal: number;
+    interest: number;
+    paid_amount: number;
+    status: EmiInstallmentStatusValue;
+}
+
+export interface SaleEmiDetail {
+    interest_method: 'none' | 'flat' | 'reducing' | null;
+    annual_rate: number;
+    frequency: 'weekly' | 'monthly' | 'quarterly' | null;
+    interest_total: number;
+    /** The goods (after discount) on the products chosen for EMI. */
+    financed_goods: number;
+    installments_total: number;
+    installments_open: number;
+    next: { id: number; number: number; due_date: string; remaining: number; overdue: boolean } | null;
+    installments: SaleEmiInstallment[];
+}
+
+export interface SalePaymentHistoryEntry {
+    id: number;
+    date: string;
+    account: string;
+    amount: number;
+    kind: 'payment' | 'refund';
+}
+
+/** Matches `ContactSearchController`'s response shape (same as `SupplierOption`, kept separate for readability at call sites). */
+export interface CustomerOption {
+    id: number;
+    name: string;
+    display_name: string;
+    phone: string | null;
+    business_name: string | null;
+    balance: number;
+}
+
+export interface RecentSaleItem {
+    product_id: number;
+    product_name: string;
+    quantity: number;
+    unit_price: number;
+}
+
+export interface RecentSale {
+    id: number;
+    invoice_no: string;
+    sale_date: string;
+    total_amount: number;
+    items: RecentSaleItem[];
+}
+
+export interface ContactPurchaseSummary {
+    id: number;
+    invoice_no: string;
+    purchase_date: string;
+    total_amount: number;
+    due_amount: number;
+    payment_status: PaymentStatusValue;
+    status: PurchaseStatusValue;
+}
+
+export interface ContactSaleSummary {
+    id: number;
+    invoice_no: string;
+    sale_date: string;
+    total_amount: number;
+    due_amount: number;
+    payment_status: PaymentStatusValue;
+    status: SaleStatusValue;
+}
+
+export type ChartOfAccountTypeValue = 'asset' | 'liability' | 'equity' | 'income' | 'expense';
+export type NormalBalanceValue = 'debit' | 'credit';
+
+export interface ChartOfAccountOption {
+    id: number;
+    code: string;
+    name: string;
+    parent_id?: number | null;
+}
+
+export interface ChartOfAccountListItem {
+    id: number;
+    code: string;
+    name: string;
+    type: ChartOfAccountTypeValue;
+    normal_balance: NormalBalanceValue;
+    parent_id: number | null;
+    parent: { id: number; name: string } | null;
+    balance: number;
+    is_active: boolean;
+    can_delete: boolean;
+}
+
+export interface JournalEntryListItem {
+    id: number;
+    entry_date: string;
+    created_at?: string;
+    description: string;
+    reference_type: string | null;
+    reference_id: number | null;
+    status: 'posted' | 'reversed';
+    total_debit: number;
+    total_credit: number;
+    /** True when this entry is itself a reversal of another — it can never be reversed again. */
+    is_reversal: boolean;
+}
+
+export interface JournalEntryLineDetail {
+    id: number;
+    chart_of_account: { id: number; code: string; name: string };
+    debit: number;
+    credit: number;
+    note: string | null;
+}
+
+export interface JournalEntryDetail {
+    id: number;
+    entry_date: string;
+    description: string;
+    reference_type: string | null;
+    reference_id: number | null;
+    status: 'posted' | 'reversed';
+    reversed_at: string | null;
+    reversal_of: { id: number; description: string } | null;
+    lines: JournalEntryLineDetail[];
+}
+
+export interface AccountingPeriodListItem {
+    id: number;
+    start_date: string;
+    end_date: string;
+    status: 'open' | 'closed';
+    closed_at: string | null;
+    closed_by: { id: number; name: string } | null;
+}
+
+export interface GeneralLedgerLine {
+    id: number;
+    entry_date: string;
+    description: string;
+    reference_type: string | null;
+    reference_id: number | null;
+    journal_entry_id: number;
+    debit: number;
+    credit: number;
+    note: string | null;
+    balance: number;
+}
+
+export interface BackupListItem {
+    filename: string;
+    date: string;
+    size_in_bytes: number;
+}
+
+export interface SaleReturnListItem {
+    /** Name of the user who added this — filled in automatically from who was logged in. */
+    added_by: string | null;
+    id: number;
+    sale: { id: number; invoice_no: string };
+    customer: { id: number; name: string };
+    return_date: string;
+    total_amount: number;
+}
+
+export interface ReturnableSaleItem {
+    id: number;
+    product: { id: number; name: string; sku: string };
+    quantity: number;
+    unit_price: number;
+    already_returned: number;
+}
+
+export interface SaleReturnCreateSale {
+    id: number;
+    invoice_no: string;
+    customer: { id: number; name: string };
+    items: ReturnableSaleItem[];
+}
+
+export interface SaleReturnItemDetail {
+    id: number;
+    product: { id: number; name: string; sku: string; track_serial_number: boolean };
+    quantity: number;
+    original_price: number;
+    unit_price: number;
+    discount_amount: number;
+    subtotal: number;
+    installation_required: boolean;
+    installation_charge: number | null;
+    emi_financed: boolean;
+    warranty_months: number | null;
+    service_plan_included: boolean;
+    /** Planned at booking; checked against real stock when the order becomes a sale. */
+    serial_numbers: string[];
+}
+
+export type SalesOrderStatusValue = 'pending' | 'partial' | 'completed' | 'cancelled';
+
+export interface SalesOrderListItem {
+    /** Name of the user who added this — filled in automatically from who was logged in. */
+    added_by: string | null;
+    id: number;
+    order_no: string;
+    customer: { id: number; name: string };
+    order_date: string;
+    expected_delivery_date: string | null;
+    total_amount: number;
+    advance_paid: number;
+    due_amount: number;
+    status: SalesOrderStatusValue;
+    can_convert: boolean;
+}
+
+export interface SalesOrderItemDetail {
+    id: number;
+    product: { id: number; name: string; sku: string; track_serial_number: boolean };
+    quantity: number;
+    original_price: number;
+    unit_price: number;
+    discount_amount: number;
+    subtotal: number;
+    installation_required: boolean;
+    installation_charge: number | null;
+    emi_financed: boolean;
+    warranty_months: number | null;
+    service_plan_included: boolean;
+    /** Planned at booking; checked against real stock when the order becomes a sale. */
+    serial_numbers: string[];
+}
+
+export interface ExpenseCategoryOption {
+    id: number;
+    name: string;
+    parent_id: number | null;
+}
+
+export interface ExpenseCategoryListItem {
+    id: number;
+    name: string;
+    parent_id: number | null;
+    parent: { id: number; name: string } | null;
+    expenses_count: number;
+    can_delete: boolean;
+}
+
+export interface ExpenseAttachment {
+    url: string;
+    name: string;
+}
+
+export interface ExpenseListItem {
+    /** Name of the user who added this — filled in automatically from who was logged in. */
+    added_by: string | null;
+    id: number;
+    category: { id: number; name: string };
+    account: { id: number; name: string } | null;
+    total_amount: number;
+    expense_date: string;
+    created_at?: string;
+    note: string | null;
+    attachment: ExpenseAttachment | null;
+}
+
+export interface SalesOrderDetail {
+    id: number;
+    order_no: string;
+    customer: { id: number; name: string; phone: string | null; balance: number };
+    order_date: string;
+    expected_delivery_date: string | null;
+    total_amount: number;
+    advance_paid: number;
+    due_amount: number;
+    subtotal: number;
+    discount_amount: number;
+    installation_amount: number;
+    financing_type: 'one_time' | 'emi';
+    installment_count: number | null;
+    emi_interest_method: string | null;
+    emi_annual_rate: number;
+    emi_frequency: string | null;
+    emi_tenure_value: number | null;
+    emi_tenure_unit: string | null;
+    status: SalesOrderStatusValue;
+    can_convert: boolean;
+    sale: { id: number; invoice_no: string } | null;
+    items: SalesOrderItemDetail[];
+}
+
+export interface SaleReturnDetail {
+    id: number;
+    sale: { id: number; invoice_no: string };
+    customer: { id: number; name: string; phone: string; balance: number };
+    return_date: string;
+    total_amount: number;
+    refunded_amount: number;
+    remaining_refundable: number;
+    reason: string | null;
+    items: SaleReturnItemDetail[];
+}
+
+export interface PurchaseReturnListItem {
+    /** Name of the user who added this — filled in automatically from who was logged in. */
+    added_by: string | null;
+    id: number;
+    purchase: { id: number; invoice_no: string };
+    supplier: { id: number; name: string };
+    return_date: string;
+    total_amount: number;
+}
+
+export interface ReturnablePurchaseItem {
+    id: number;
+    product: { id: number; name: string; sku: string };
+    quantity: number;
+    unit_price: number;
+    already_returned: number;
+}
+
+export interface PurchaseReturnCreatePurchase {
+    id: number;
+    invoice_no: string;
+    supplier: { id: number; name: string };
+    items: ReturnablePurchaseItem[];
+}
+
+export interface PurchaseReturnItemDetail {
+    id: number;
+    product: { id: number; name: string; sku: string };
+    quantity: number;
+    unit_price: number;
+    subtotal: number;
+}
+
+export interface PurchaseReturnDetail {
+    id: number;
+    purchase: { id: number; invoice_no: string };
+    supplier: { id: number; name: string; phone: string; balance: number };
+    return_date: string;
+    total_amount: number;
+    refunded_amount: number;
+    remaining_refundable: number;
+    reason: string | null;
+    items: PurchaseReturnItemDetail[];
+}
+
+/** Shared shape for the Asset/Company Loan/Investor/Other Liability ledger — same running-balance table on every Detail page. */
+export interface LedgerTransactionRow {
+    id: number;
+    type: string;
+    amount: number;
+    account: { id: number; name: string } | null;
+    note: string | null;
+    created_at: string;
+    balance: number;
+    added_by: string | null;
+}
+
+export type AssetTransactionTypeValue = 'opening_asset' | 'purchase' | 'addition' | 'sold' | 'disposal' | 'adjustment';
+
+export interface AssetListItem {
+    id: number;
+    name: string;
+    opening_value: number;
+    current_value: number;
+    purchase_date: string | null;
+    can_delete: boolean;
+    can_edit_opening_value: boolean;
+}
+
+export interface AssetDetail {
+    id: number;
+    name: string;
+    current_value: number;
+    purchase_date: string | null;
+}
+
+export type LoanTransactionTypeValue = 'opening_loan' | 'disbursement' | 'repayment' | 'interest_charge' | 'adjustment';
+
+export interface CompanyLoanListItem {
+    id: number;
+    lender_name: string;
+    loan_amount: number;
+    interest_rate: number | null;
+    outstanding_balance: number;
+    start_date: string;
+    can_delete: boolean;
+}
+
+export interface CompanyLoanDetail {
+    id: number;
+    lender_name: string;
+    loan_amount: number;
+    interest_rate: number | null;
+    outstanding_balance: number;
+    start_date: string;
+}
+
+export type InvestorTransactionTypeValue = 'opening_balance' | 'investment' | 'profit_share' | 'withdrawal' | 'adjustment';
+
+export interface InvestorListItem {
+    id: number;
+    name: string;
+    phone: string | null;
+    note: string | null;
+    opening_amount: number;
+    total_invested: number;
+    can_delete: boolean;
+    can_edit_opening_amount: boolean;
+}
+
+export interface InvestorDetail {
+    id: number;
+    name: string;
+    total_invested: number;
+}
+
+export type OtherLiabilityTransactionTypeValue = 'opening_liability' | 'increase' | 'payment' | 'adjustment';
+
+export interface OtherLiabilityListItem {
+    id: number;
+    name: string;
+    opening_amount: number;
+    current_balance: number;
+    can_delete: boolean;
+    can_edit_opening_amount: boolean;
+}
+
+export interface OtherLiabilityDetail {
+    id: number;
+    name: string;
+    current_balance: number;
+}
+
+export type StaffStatusValue = 'active' | 'inactive';
+export type BalanceEffectValue = 'increase' | 'decrease' | 'none';
+export type StaffTransactionNatureValue = 'expense' | 'settlement' | 'advance' | 'advance_return' | 'adjustment' | 'salary';
+
+export interface StaffTransactionTypeOption {
+    id: number;
+    name: string;
+    effect_on_balance: BalanceEffectValue;
+    nature: StaffTransactionNatureValue;
+}
+
+export interface StaffListItem {
+    id: number;
+    name: string;
+    phone: string | null;
+    designation: string | null;
+    joining_date: string | null;
+    salary_amount: number;
+    status: StaffStatusValue;
+    investor: { id: number; name: string } | null;
+    balance: number;
+    can_delete: boolean;
+}
+
+export interface StaffDetail {
+    id: number;
+    name: string;
+    phone: string | null;
+    designation: string | null;
+    salary_amount: number;
+    balance: number;
+    balance_label: string;
+}
+
+export interface StaffLedgerRow {
+    id: number;
+    type: { id: number; name: string };
+    amount: number;
+    account: { id: number; name: string } | null;
+    note: string | null;
+    created_at: string;
+    balance: number;
+    added_by: string | null;
+}
+
+export type ServiceRequestTypeValue = 'installation' | 'service';
+export type ServiceRequestStatusValue = 'pending' | 'scheduled' | 'completed' | 'cancelled';
+export type WarrantyClaimStatusValue = 'pending' | 'in_progress' | 'resolved' | 'rejected';
+
+export interface ServiceRequestListItem {
+    id: number;
+    product: { id: number; name: string; sku: string };
+    invoice_no: string;
+    customer: { id: number; name: string };
+    type: ServiceRequestTypeValue;
+    is_free: boolean;
+    charge_amount: number;
+    staff: { id: number; name: string } | null;
+    status: ServiceRequestStatusValue;
+    /** Where the request can go from here; empty once it is completed or cancelled. */
+    next_statuses: ServiceRequestStatusValue[];
+    request_date: string;
+    service_date: string | null;
+    note: string | null;
+}
+
+/** A person who can be assigned a job: only working staff, with their role shown. */
+export interface ServiceStaffOption {
+    id: number;
+    name: string;
+    designation: string | null;
+}
+
+/** One item on an invoice found by the service-request lookup, with what its next visit would cost. */
+export interface ServiceLookupItem {
+    id: number;
+    product: { id: number; name: string; sku: string };
+    quantity: number;
+    is_next_free: boolean;
+    free_left: number;
+    has_service_plan: boolean;
+    has_installation_service: boolean;
+    warranty_expires_at: string | null;
+    in_warranty: boolean;
+}
+
+export interface ServiceLookupInvoice {
+    id: number;
+    invoice_no: string;
+    sale_date: string;
+    customer: { id: number; name: string; phone: string | null };
+    items: ServiceLookupItem[];
+}
+
+export interface WarrantyableSaleItem {
+    id: number;
+    product: { id: number; name: string; sku: string };
+    invoice_no: string;
+    customer: { id: number; name: string };
+    warranty_expires_at: string | null;
+}
+
+export interface WarrantyClaimListItem {
+    id: number;
+    product: { id: number; name: string; sku: string };
+    invoice_no: string;
+    customer: { id: number; name: string };
+    warranty_expires_at: string | null;
+    claim_date: string;
+    issue_description: string;
+    status: WarrantyClaimStatusValue;
+    resolution_note: string | null;
+}
+
+export interface QuickAction {
+    label: string;
+    href: string;
+}
+
+/** Keep in sync with `App\Enums\DateRangePreset`. */
+export type DateRangePresetValue =
+    | 'today'
+    | 'yesterday'
+    | 'last_7_days'
+    | 'last_30_days'
+    | 'this_month'
+    | 'last_month'
+    | 'this_month_last_year'
+    | 'this_year'
+    | 'last_year'
+    | 'custom';
+
+export interface DashboardRange {
+    preset: DateRangePresetValue;
+    from: string;
+    to: string;
+}
+
+/** Sales/Purchases & Expenses cards — filtered by `DashboardRange` (doc/corrections2.md #4). */
+export interface DashboardMetrics {
+    totalSales: number;
+    netSales: number;
+    invoiceDue: number;
+    totalSellReturn: number;
+    totalPurchase: number;
+    purchaseDue: number;
+    totalPurchaseReturn: number;
+    totalExpense: number;
+}
+
+/** Point-in-time balances (Chart-of-Accounts-sourced) — not affected by the date filter. */
+export interface DashboardBalances {
+    totalReceivable: number;
+    totalPayable: number;
+    cashAndBank: number;
+    lowStockCount: number;
+    closingStockValue: number;
+}
+
+export interface DashboardLowStockProduct {
+    id: number;
+    name: string;
+    sku: string;
+    current_stock: number;
+    minimum_stock_level: number;
+}
+
+export interface DashboardDailySalesPoint {
+    date: string;
+    total: number;
+}
+
+export interface DashboardMonthlySalesPoint {
+    month: string;
+    label: string;
+    total: number;
+}
+
+export interface DashboardRevenueExpensePoint {
+    month: string;
+    label: string;
+    revenue: number;
+    expense: number;
+}
+
+/** Subset of `DateRangePresetValue` accepted by the best-sellers/purchases widget's own `period` filter. */
+export type BestSellersPeriodValue = 'today' | 'yesterday' | 'last_7_days' | 'last_30_days';
+
+export interface DashboardBestSellerItem {
+    id: number;
+    name: string;
+    sku: string;
+    quantity: number;
+    total_amount: number;
+}
+
+/** Shared row shape for `recentTransactions.{sales,purchases,expenses}` on the dashboard. */
+export interface DashboardRecentTransactionRow {
+    id: number;
+    invoice_no: string;
+    party_name: string;
+    amount: number;
+    status: string;
+    date: string;
+    href: string;
+}
+
+export interface DashboardRecentTransactions {
+    sales: DashboardRecentTransactionRow[];
+    purchases: DashboardRecentTransactionRow[];
+    expenses: DashboardRecentTransactionRow[];
+}
+
+export interface ChartOfAccountLine {
+    id: number;
+    code: string;
+    name: string;
+    amount: number;
+}
+
+export interface BalanceSheetAccountRow {
+    id: number;
+    code: string;
+    name: string;
+    balance: number;
+}
+
+export interface QuickBalanceSheet {
+    receivable: number;
+    payable: number;
+    inventory: number;
+    cashAndBank: number;
+}
+
+export interface FullFinancialPosition {
+    assets: BalanceSheetAccountRow[];
+    liabilities: BalanceSheetAccountRow[];
+    equity: BalanceSheetAccountRow[];
+    netProfit: number;
+    assetsTotal: number;
+    liabilitiesAndEquityTotal: number;
+}
+
+/** One as-of-date section of `FinancialPositionReportData` — e.g. Sundry Debtors, Cash at Bank. */
+export interface FinancialPositionSection {
+    total: number;
+    breakdown: { name: string; amount: number }[];
+}
+
+/** `FinancialPositionReport::forEndDate()` — the ledger-per-module report, distinct from `FullFinancialPosition` (Chart-of-Accounts based). */
+export interface FinancialPositionReportData {
+    end_date: string;
+    assets: {
+        closing_stock: FinancialPositionSection;
+        sundry_debtors: FinancialPositionSection;
+        staff_advances: FinancialPositionSection;
+        cash_and_bank: FinancialPositionSection;
+        other_assets: FinancialPositionSection;
+        total: number;
+    };
+    liabilities: {
+        investor_capital: FinancialPositionSection;
+        company_loans: FinancialPositionSection;
+        sundry_creditors: FinancialPositionSection;
+        other_liabilities: FinancialPositionSection;
+        net_profit: number;
+        total: number;
+    };
+}
+
+export interface TrialBalanceRow {
+    id: number;
+    code: string;
+    name: string;
+    debit: number;
+    credit: number;
+}
+
+export interface CashFlowTypeRow {
+    type: string;
+    total: number;
+}
+
+export interface StockReportRow {
+    id: number;
+    name: string;
+    sku: string;
+    current_stock: number;
+    avg_cost: number;
+    stock_value: number;
+    stock_status: 'in_stock' | 'low_stock' | 'out_of_stock';
+}
+
+export interface DueRow {
+    id: number;
+    name: string;
+    phone?: string;
+    balance: number;
+}
+
+export interface TrendingProductRow {
+    id: number;
+    name: string;
+    sku: string;
+    quantity_sold: number;
+    revenue: number;
+}
+
+export interface PermissionOption {
+    id: number;
+    name: string;
+    action: string;
+}
+
+export interface RoleListItem {
+    id: number;
+    name: string;
+    users_count: number;
+    permissions: string[];
+    protected: boolean;
+}
+
+export interface RoleUserListItem {
+    id: number;
+    name: string;
+    email: string;
+    username: string | null;
+    is_active: boolean;
+    roles: string[];
+    can_delete: boolean;
+}
+
+export interface OtherIncomeListItem {
+    /** Name of the user who added this — filled in automatically from who was logged in. */
+    added_by: string | null;
+    id: number;
+    category: { id: number; name: string };
+    account: { id: number; name: string };
+    amount: number;
+    income_date: string;
+    note: string | null;
+}
+
+export interface OtherIncomeCategoryRow {
+    id: number;
+    name: string;
+    incomes_count: number;
+    can_delete: boolean;
+}
+
+export interface DashboardSalesOrders {
+    count: number;
+    total: number;
+    advance: number;
+    items: { id: number; order_no: string; customer: string; expected_delivery_date: string | null; total_amount: number; due_amount: number }[];
+}
+
+export interface DashboardFollowUps {
+    emi: {
+        overdue_count: number;
+        overdue_amount: number;
+        due_soon_count: number;
+        due_soon_amount: number;
+        items: {
+            id: number;
+            sale_id: number;
+            invoice_no: string;
+            customer: string;
+            phone: string | null;
+            number: number;
+            due_date: string;
+            remaining: number;
+            overdue: boolean;
+        }[];
+    } | null;
+    warranties: {
+        count: number;
+        items: { id: number; sale_id: number; invoice_no: string; product: string; customer: string; phone: string | null; expires_on: string }[];
+    };
+}
+
+export interface DashboardBooksCheck {
+    checked_at: string;
+    failed_checks: string[];
+}
+
