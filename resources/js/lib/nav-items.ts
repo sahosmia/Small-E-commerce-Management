@@ -12,6 +12,7 @@ import {
     Receipt,
     Settings,
     ShoppingCart,
+    Store,
     Users,
     Wallet,
 } from 'lucide-react';
@@ -23,6 +24,16 @@ export function buildMainNavItems(emiModuleEnabled: boolean, t: ReturnType<typeo
             title: t('nav', 'dashboard'),
             url: '/dashboard',
             icon: LayoutGrid,
+        },
+        {
+            key: 'shops',
+            title: 'Shops',
+            url: '/shops',
+            icon: Store,
+            items: [
+                { key: 'all_shops', title: 'All Shops', url: '/shops' },
+                { key: 'create_shop', title: 'Create Shop', url: '/shops/create' },
+            ],
         },
         
     

@@ -1133,24 +1133,9 @@ export interface QuickAction {
     href: string;
 }
 
-/** Keep in sync with `App\Enums\DateRangePreset`. */
-export type DateRangePresetValue =
-    | 'today'
-    | 'yesterday'
-    | 'last_7_days'
-    | 'last_30_days'
-    | 'this_month'
-    | 'last_month'
-    | 'this_month_last_year'
-    | 'this_year'
-    | 'last_year'
-    | 'custom';
 
-export interface DashboardRange {
-    preset: DateRangePresetValue;
-    from: string;
-    to: string;
-}
+
+
 
 /** Sales/Purchases & Expenses cards — filtered by `DashboardRange` (doc/corrections2.md #4). */
 export interface DashboardMetrics {
@@ -1199,8 +1184,7 @@ export interface DashboardRevenueExpensePoint {
     expense: number;
 }
 
-/** Subset of `DateRangePresetValue` accepted by the best-sellers/purchases widget's own `period` filter. */
-export type BestSellersPeriodValue = 'today' | 'yesterday' | 'last_7_days' | 'last_30_days';
+
 
 export interface DashboardBestSellerItem {
     id: number;

@@ -51,7 +51,7 @@ export default function DataTablePagination({
                 <span className="tabular-nums">
                     {pagination.total === 0 ? `No ${itemLabel}` : `Showing ${pagination.from}–${pagination.to} of ${pagination.total} ${itemLabel}`}
                 </span>
-                {(perPageOptions.length > 1 || allowAll) && (
+                {(allowAll) && (
                     <Select value={String(perPage)} onValueChange={(value) => onPerPageChange(value === 'all' ? 'all' : Number(value))}>
                         <SelectTrigger size="sm" className="w-[110px]">
                             <SelectValue />

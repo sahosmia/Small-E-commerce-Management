@@ -13,9 +13,6 @@ use App\Http\Requests\Products\Product\UpdateProductRequest;
 use App\Http\Resources\Product\ProductFormResource;
 use App\Http\Resources\Product\ProductListResource;
 use App\Models\Product;
-use App\Models\Settings;
-use App\Queries\Product\ProductFormOptions;
-use App\Queries\Product\ProductQuery;
 use App\Support\BulkDelete;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -27,20 +24,37 @@ class ProductController extends Controller
     public function index(ProductIndexRequest $request): Response
     {
         $filters = $request->validated();
-        $query = ProductQuery::filtered($filters);
+        $query = Product::query();
 
-        $resolvedPerPage = Settings::resolveRequestedPerPage($filters['per_page'] ?? null);
+        if (! empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('sku', 'like', "%{$search}%")
+                  ->orWhere('barcode', 'like', "%{$search}%");
+            });
+        }
 
-        $products = $query->paginate($resolvedPerPage ?? Settings::MAX_UNPAGINATED_ROWS)->withQueryString();
+        if (isset($filters['stock_status'])) {
+            if ($filters['stock_status'] === 'out_of_stock') {
+                $query->where('current_stock', '<=', 0);
+            } elseif ($filters['stock_status'] === 'low_stock') {
+                $query->where('current_stock', '>', 0)
+                      ->whereColumn('current_stock', '<=', 'minimum_stock_level');
+            } elseif ($filters['stock_status'] === 'in_stock') {
+                $query->whereColumn('current_stock', '>', 'minimum_stock_level');
+            }
+        }
 
-        $products = $products->through(fn (Product $product) => ProductListResource::make($product)->resolve());
+        $sort = $filters['sort'] ?? 'name';
+        $direction = $filters['direction'] ?? 'asc';
+        $query->orderBy($sort, $direction);
 
-        // `select()` (not `selectRaw()`, which only appends) so this replaces the
-        // `has_stock_movements` exists-select ProductQuery::filtered() adds for the list
-        // view — otherwise it lingers alongside these aggregates with no GROUP BY (MySQL 1140).
-        $rawStats = ProductQuery::filtered($filters)
-            ->reorder()
-            ->toBase()
+        $perPage = ! empty($filters['per_page']) && is_numeric($filters['per_page']) ? (int) $filters['per_page'] : 15;
+        $products = $query->paginate($perPage)->withQueryString();
+        $products->through(fn (Product $product) => ProductListResource::make($product)->resolve());
+
+        $rawStats = Product::query()
             ->select(DB::raw('
                 COUNT(*) as total_products,
                 COALESCE(SUM(CASE WHEN manage_stock = 1 THEN current_stock ELSE 0 END), 0) as total_stock,
@@ -59,19 +73,18 @@ class ProductController extends Controller
         return Inertia::render('products/index', [
             'products' => $products,
             'stats' => $stats,
-            ...ProductFormOptions::forIndex(),
             'filters' => [
                 ...$filters,
-                'sort' => $filters['sort'] ?? 'name',
-                'direction' => $filters['direction'] ?? 'asc',
-                'per_page' => $resolvedPerPage ?? 'all',
+                'sort' => $sort,
+                'direction' => $direction,
+                'per_page' => $perPage,
             ],
         ]);
     }
 
     public function create(): Response
     {
-        return Inertia::render('products/create', ProductFormOptions::forIndex());
+        return Inertia::render('products/create');
     }
 
     public function store(StoreProductRequest $request, CreateProductAction $createProduct): RedirectResponse
@@ -83,42 +96,12 @@ class ProductController extends Controller
 
     public function show(Product $product): Response
     {
-        $product->load(['category', 'brand', 'unit']);
-
-        $movements = $product->stockMovements()
-            ->latest('id')
-            ->paginate(20)
-            ->through(fn ($movement) => [
-                'id' => $movement->id,
-                'type' => $movement->type->value,
-                'type_label' => match ($movement->type->value) {
-                    'opening_stock' => 'Opening Stock',
-                    'purchase' => 'Purchase',
-                    'sale' => 'Sale',
-                    'sale_return' => 'Sale Return',
-                    'purchase_return' => 'Purchase Return',
-                    'adjustment_increase' => 'Adjustment (Increase)',
-                    'adjustment_decrease' => 'Adjustment (Decrease)',
-                    default => $movement->type->value,
-                },
-                'is_increase' => $movement->type->increasesStock(),
-                'quantity' => $movement->quantity,
-                'unit_cost' => $movement->unit_cost,
-                'total_cost' => $movement->total_cost,
-                'reference_type' => $movement->reference_type,
-                'reference_id' => $movement->reference_id,
-                'note' => $movement->note,
-                'created_at' => $movement->created_at->toDateTimeString(),
-            ]);
-
         return Inertia::render('products/show', [
             'product' => [
                 'id' => $product->id,
                 'name' => $product->name,
                 'sku' => $product->sku,
-                'category' => $product->category?->only(['id', 'name']),
-                'brand' => $product->brand?->only(['id', 'name']),
-                'unit' => $product->unit->only(['id', 'name']),
+                'barcode' => $product->barcode,
                 'avg_cost' => $product->avg_cost,
                 'selling_price' => $product->selling_price,
                 'current_stock' => $product->current_stock,
@@ -126,14 +109,10 @@ class ProductController extends Controller
                 'stock_status' => $product->stock_status,
                 'profit_margin' => $product->profit_margin,
                 'manage_stock' => $product->manage_stock,
-                'warranty_period_months' => $product->warranty_period_months,
-                'has_installation_service' => $product->has_installation_service,
-                'track_serial_number' => $product->track_serial_number,
                 'is_for_sale' => $product->is_for_sale,
                 'is_active' => $product->is_active,
                 'image_url' => $product->imageUrl(),
             ],
-            'movements' => $movements,
         ]);
     }
 
@@ -141,7 +120,6 @@ class ProductController extends Controller
     {
         return Inertia::render('products/edit', [
             'product' => ProductFormResource::make($product)->resolve(),
-            ...ProductFormOptions::forIndex(),
         ]);
     }
 
@@ -154,18 +132,11 @@ class ProductController extends Controller
 
     public function destroy(Product $product, DeleteProductAction $deleteProduct): RedirectResponse
     {
-        if ($blockedBy = $deleteProduct->blockingReason($product)) {
-            return back()->withErrors(['product' => $blockedBy]);
-        }
-
         $deleteProduct->execute($product);
 
         return to_route('products.index');
     }
 
-    /**
-     * "Delete selected" — each record is checked by the same rule as the single delete.
-     */
     public function bulkDestroy(BulkDestroyRequest $request, DeleteProductAction $deleteProduct): RedirectResponse
     {
         return BulkDelete::respond(BulkDelete::run(

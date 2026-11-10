@@ -3,18 +3,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { type DateRangePresetValue } from '@/types/models';
 import { useEffect, useState } from 'react';
 
-const PRESETS: { value: DateRangePresetValue; label: string }[] = [
-    { value: 'today', label: 'Today' },
-    { value: 'yesterday', label: 'Yesterday' },
-    { value: 'last_7_days', label: 'Last 7 Days' },
-    { value: 'last_30_days', label: 'Last 30 Days' },
-    { value: 'this_month', label: 'This Month' },
-    { value: 'last_month', label: 'Last Month' },
-    { value: 'this_month_last_year', label: 'This Month Last Year' },
-    { value: 'this_year', label: 'This Year' },
-    { value: 'last_year', label: 'Last Year' },
-    { value: 'custom', label: 'Custom Range' },
-];
 
 /** UI-only sentinel for the "All Time" option — never a real `DateRangePresetValue`. */
 const CLEAR_VALUE = 'all_time';

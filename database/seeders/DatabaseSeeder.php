@@ -41,11 +41,8 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->call([
-            SettingsSeeder::class,
-            // Gives every user that already exists (the one above) the Admin role.
-            RolePermissionSeeder::class,
+           
 
-            DummyDataSeeder::class,
         ]);
     }
 }

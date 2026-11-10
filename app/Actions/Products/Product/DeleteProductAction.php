@@ -16,7 +16,6 @@ class DeleteProductAction
     public function blockingReason(Product $product): ?string
     {
         return match (true) {
-            $product->stockMovements()->exists() => 'This product has stock movements — mark it inactive instead of deleting it.',
             $product->saleItems()->exists() => 'This product has recorded sales — mark it inactive instead of deleting it.',
             $product->purchaseItems()->exists() => 'This product has recorded purchases — mark it inactive instead of deleting it.',
             $product->serialNumbers()->exists() => 'This product has tracked serial numbers — mark it inactive instead of deleting it.',
