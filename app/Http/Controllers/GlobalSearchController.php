@@ -32,12 +32,11 @@ class GlobalSearchController extends Controller
             $products = Product::query()
                 ->where(function (Builder $query) use ($search) {
                     $query->where('name', 'like', "%{$search}%")
-                        ->orWhere('sku', 'like', "%{$search}%")
-                        ->orWhere('barcode', 'like', "%{$search}%");
+                        ->orWhere('sku', 'like', "%{$search}%");
                 })
                 ->orderBy('name')
                 ->limit(5)
-                ->get(['id', 'name', 'sku', 'selling_price']);
+                ->get(['id', 'name', 'sku', 'base_price']);
         }
 
         return response()->json([

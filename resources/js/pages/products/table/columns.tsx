@@ -5,7 +5,6 @@ import { type DataTableColumnOption } from '@/components/data-table/types';
 import { getProductActions } from '@/components/products/product-actions';
 import { ProductImage } from '@/components/products/product-image';
 import ProductStatusBadge from '@/components/products/product-status-badge';
-import StockQuantity from '@/components/products/stock-quantity';
 import { useMoneyFormat } from '@/hooks/use-money-format';
 import { type ProductListItem } from '@/types/models';
 import { type ColumnDef } from '@tanstack/react-table';
@@ -23,39 +22,33 @@ interface UseProductColumnsOptions {
         isAllSelected: boolean;
         isSomeSelected: boolean;
     };
-    onAdjustStock: (product: ProductListItem) => void;
     onDelete: (product: ProductListItem) => void;
 }
 
-/** The Table view's toggleable columns (Product bundles name+sku+image, so it's coarser than the export columns below). */
+/** The Table view's toggleable columns. */
 export const getVisibilityColumns = (): DataTableColumnOption[] => [
     { id: 'product', label: "Product" },
     { id: 'category', label: "Category / Brand" },
-    { id: 'stock', label: "Stock" },
     { id: 'pap', label: "Purchase Average Price (P.A.P)" },
-    { id: 'tpp', label: "Total Purchase Price (T.P.P)" },
     { id: 'price', label: "Selling Price" },
     { id: 'margin', label: "Margin" },
     { id: 'status', label: "Status" },
 ];
 
-/** Fine-grained export columns — matches `ProductExportController::COLUMN_LABELS` on the backend. */
+/** Fine-grained export columns. */
 export const getExportColumns = (): DataTableColumnOption[] => [
     { id: 'name', label: "Name" },
     { id: 'sku', label: "SKU" },
-    { id: 'barcode', label: "Barcode" },
     { id: 'category', label: "Category" },
     { id: 'brand', label: "Brand" },
-    { id: 'stock', label: "Stock" },
     { id: 'pap', label: "Purchase Average Price (P.A.P)" },
-    { id: 'tpp', label: "Total Purchase Price (T.P.P)" },
     { id: 'price', label: "Selling Price" },
     { id: 'margin', label: "Margin %" },
     { id: 'status', label: "Status" },
 ];
 
-/** Column definitions for the Products table — kept next to the page, not inside the generic DataTable. */
-export function useProductColumns({ sort, direction, onSort, selection, onAdjustStock, onDelete }: UseProductColumnsOptions) {
+/** Column definitions for the Products table. */
+export function useProductColumns({ sort, direction, onSort, selection, onDelete }: UseProductColumnsOptions) {
     const money = useMoneyFormat();
     
     return useMemo<ColumnDef<ProductListItem>[]>(
@@ -80,7 +73,7 @@ export function useProductColumns({ sort, direction, onSort, selection, onAdjust
                 id: 'actions',
                 header: '',
                 meta: { headerClassName: 'w-10', cellClassName: 'w-10', printHidden: true },
-                cell: ({ row }) => <DataTableRowActions actions={getProductActions(row.original, { onAdjustStock, onDelete })} />,
+                cell: ({ row }) => <DataTableRowActions actions={getProductActions(row.original, { onDelete })} />,
             },
             {
                 id: 'product',
@@ -119,21 +112,6 @@ export function useProductColumns({ sort, direction, onSort, selection, onAdjust
                 ),
             },
             {
-                id: 'stock',
-                header: () => (
-                    <DataTableColumnHeader
-                        title={"Stock"}
-                        sortKey="current_stock"
-                        currentSort={sort}
-                        currentDirection={direction}
-                        onSort={onSort}
-                        align="right"
-                    />
-                ),
-                meta: { headerClassName: 'text-right', cellClassName: 'text-right tabular-nums', label: "Stock" },
-                cell: ({ row }) => <StockQuantity product={row.original} />,
-            },
-            {
                 id: 'pap',
                 header: () => (
                     <DataTableColumnHeader
@@ -147,12 +125,6 @@ export function useProductColumns({ sort, direction, onSort, selection, onAdjust
                 ),
                 meta: { headerClassName: 'text-right', cellClassName: 'text-right tabular-nums', label: "Purchase Average Price (P.A.P)" },
                 cell: ({ row }) => money(row.original.avg_cost),
-            },
-            {
-                id: 'tpp',
-                header: "Total Purchase Price (T.P.P)",
-                meta: { headerClassName: 'text-right', cellClassName: 'text-right tabular-nums', label: "Total Purchase Price (T.P.P)" },
-                cell: ({ row }) => (row.original.manage_stock ? money(row.original.avg_cost * row.original.current_stock) : '—'),
             },
             {
                 id: 'price',
@@ -179,9 +151,9 @@ export function useProductColumns({ sort, direction, onSort, selection, onAdjust
                 id: 'status',
                 header: "Status",
                 meta: { label: "Status" },
-                cell: ({ row }) => <ProductStatusBadge product={row.original} hideStockStatus />,
+                cell: ({ row }) => <ProductStatusBadge product={row.original} />,
             },
         ],
-        [selection, onAdjustStock, onDelete, sort, direction, onSort, money],
+        [selection, onDelete, sort, direction, onSort, money],
     );
 }

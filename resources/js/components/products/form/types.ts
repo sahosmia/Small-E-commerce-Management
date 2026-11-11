@@ -5,15 +5,10 @@ import { type InertiaFormProps } from '@inertiajs/react';
 export type ProductFormData = {
     name: string;
     sku: string;
-    barcode: string;
     category_id: number | null;
     brand_id: number | null;
     unit_id: number;
     selling_price: number;
-    minimum_stock_level: number;
-    manage_stock: boolean;
-    opening_stock: number;
-    opening_stock_cost: number;
     warranty_period_months: number | null;
     has_installation_service: boolean;
     emi_available: boolean;

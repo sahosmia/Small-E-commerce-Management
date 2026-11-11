@@ -6,7 +6,7 @@ import SearchableSelect from '@/components/shared/searchable-select';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type Brand, type Category, type Unit } from '@/types/models';
-import { Barcode, Hash, Package, Plus, Tag } from 'lucide-react';
+import { Hash, Package, Plus, Tag } from 'lucide-react';
 
 interface BasicInfoSectionProps {
     form: ProductFormApi;
@@ -16,11 +16,11 @@ interface BasicInfoSectionProps {
     onAddLookup: (kind: LookupKind) => void;
 }
 
-/** Name, SKU, barcode and the category / brand / unit pickers (each with a "+" to create one on the spot). */
+/** Name, SKU and the category / brand / unit pickers (each with a "+" to create one on the spot). */
 export function BasicInfoSection({ form, categories, brands, units, onAddLookup }: BasicInfoSectionProps) {
     
     return (
-        <FormSection icon={Package} title={"Basic Info"} description="Name, SKU, category, brand এবং unit" accent="sky">
+        <FormSection icon={Package} title={"Basic Info"} description="Name, SKU, category, brand and unit" accent="sky">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <div className="lg:col-span-2">
                     <FormInput
@@ -44,16 +44,6 @@ export function BasicInfoSection({ form, categories, brands, units, onAddLookup 
                     error={form.errors.sku}
                     placeholder="e.g. SKU-10001"
                     icon={Hash}
-                />
-
-                <FormInput
-                    id="barcode"
-                    label={"Barcode"}
-                    value={form.data.barcode}
-                    onChange={(e) => form.setData('barcode', e.target.value)}
-                    error={form.errors.barcode}
-                    placeholder="Scan or type barcode"
-                    icon={Barcode}
                 />
 
                 <FormField id="category_id" label={"Category"} error={form.errors.category_id}>
