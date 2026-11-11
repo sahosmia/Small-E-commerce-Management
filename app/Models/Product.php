@@ -2,38 +2,31 @@
 
 namespace App\Models;
 
-use App\Models\Concerns\HasCreator;
-use App\Models\Concerns\LogsActivityDefaults;
-use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Product extends Model implements HasMedia
+class Product extends Model
 {
-    use HasCreator;
-
-    /** @use HasFactory<ProductFactory> */
     use HasFactory;
-
-    use InteractsWithMedia;
-    use LogsActivityDefaults;
+    use SoftDeletes;
 
     /**
-     * `avg_cost` and `current_stock` are deliberately not fillable — they
-     * may only change through StockService, alongside a stock_movements row.
-     *
      * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'sku',
-        'base_price',
-
-        'is_active',
         'created_by',
+        'name',
+        'slug',
+        'sku',
+        'description',
+        'base_price',
+        'thumbnail',
+        'is_active',
     ];
 
     /**
@@ -42,15 +35,55 @@ class Product extends Model implements HasMedia
     protected function casts(): array
     {
         return [
-
+            'base_price' => 'decimal:2',
             'is_active' => 'boolean',
-
         ];
     }
 
     /**
-     * SKU is optional on the create form — an admin who doesn't care to pick
-     * one yet gets a short, unique placeholder instead of a blank/duplicate value.
+     * @return BelongsTo<User, $this>
+     */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * @return HasMany<ShopProduct, $this>
+     */
+    public function shopProducts(): HasMany
+    {
+        return $this->hasMany(ShopProduct::class);
+    }
+
+    /**
+     * @return BelongsToMany<Shop, $this>
+     */
+    public function shops(): BelongsToMany
+    {
+        return $this->belongsToMany(Shop::class, 'shop_products')
+            ->withPivot(['id', 'price', 'description', 'thumbnail', 'status'])
+            ->withTimestamps();
+    }
+
+    /**
+     * Helper to get thumbnail URL.
+     */
+    public function thumbnailUrl(): ?string
+    {
+        if (! $this->thumbnail) {
+            return null;
+        }
+
+        if (str_starts_with($this->thumbnail, 'http://') || str_starts_with($this->thumbnail, 'https://')) {
+            return $this->thumbnail;
+        }
+
+        return '/storage/'.$this->thumbnail;
+    }
+
+    /**
+     * Generate unique SKU.
      */
     public static function generateUniqueSku(): string
     {
@@ -62,24 +95,22 @@ class Product extends Model implements HasMedia
     }
 
     /**
-     * The photo's URL as a path on this site ("/storage/…"), not an absolute one built from APP_URL — so it still loads
-     * when the app is opened on a different host or port than APP_URL says (localhost vs 127.0.0.1, a vhost, a LAN IP).
+     * Generate unique slug from name.
      */
-    public function imageUrl(): ?string
+    public static function generateUniqueSlug(string $name, ?int $ignoreId = null): string
     {
-        $url = $this->getFirstMediaUrl('images');
+        $baseSlug = Str::slug($name);
+        $slug = $baseSlug;
+        $count = 1;
 
-        return $url === '' ? null : (parse_url($url, PHP_URL_PATH) ?: null);
-    }
+        while (static::query()
+            ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
+            ->where('slug', $slug)
+            ->exists()) {
+            $slug = "{$baseSlug}-{$count}";
+            $count++;
+        }
 
-    /**
-     * A single product photo — no custom column, just the package's
-     * polymorphic `media` table.
-     */
-    public function registerMediaCollections(): void
-    {
-        $this->addMediaCollection('images')
-            ->singleFile()
-            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
+        return $slug;
     }
 }

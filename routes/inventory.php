@@ -1,33 +1,34 @@
 <?php
 
-use App\Http\Controllers\Products\BrandController;
-use App\Http\Controllers\Products\CategoryController;
-use App\Http\Controllers\Products\ProductController;
-use App\Http\Controllers\Products\ProductExportController;
-use App\Http\Controllers\Products\ProductSearchController;
-use App\Http\Controllers\Products\StockAdjustmentController;
-use App\Http\Controllers\Products\UnitController;
+use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Customer\ProductController as CustomerProductController;
+use App\Http\Controllers\Owner\CatalogController as OwnerCatalogController;
+use App\Http\Controllers\Owner\ShopProductController as OwnerShopProductController;
+use App\Http\Middleware\EnsureUserIsAdmin;
+use App\Http\Middleware\EnsureUserIsShopOwner;
 use Illuminate\Support\Facades\Route;
 
+// Public Customer Shop Storefront
+Route::get('shops/{shop:slug}/products', [CustomerProductController::class, 'index'])->name('customer.shops.products.index');
+Route::get('shops/{shop:slug}/products/{product:slug}', [CustomerProductController::class, 'show'])->name('customer.shops.products.show');
+
+// Authenticated Routes
 Route::middleware(['auth'])->group(function () {
-    Route::resource('categories', CategoryController::class)
-        ->only(['index', 'store', 'update', 'destroy']);
+    // Admin Global Product Management
+    Route::middleware([EnsureUserIsAdmin::class])->prefix('admin')->name('admin.')->group(function () {
+        Route::patch('products/{product}/toggle-status', [AdminProductController::class, 'toggleStatus'])->name('products.toggle-status');
+        Route::resource('products', AdminProductController::class);
+    });
 
-    Route::resource('units', UnitController::class)
-        ->only(['index', 'store', 'update', 'destroy']);
+    // Owner Shared Catalog & Shop Products
+    Route::middleware([EnsureUserIsShopOwner::class])->prefix('owner')->name('owner.')->group(function () {
+        // Shared Catalog
+        Route::get('catalog', [OwnerCatalogController::class, 'index'])->name('catalog.index');
+        Route::get('catalog/{product}', [OwnerCatalogController::class, 'show'])->name('catalog.show');
+        Route::post('catalog/{product}/add', [OwnerCatalogController::class, 'store'])->name('catalog.add');
 
-    Route::resource('brands', BrandController::class)
-        ->only(['index', 'store', 'update', 'destroy']);
-
-    Route::get('products/export', ProductExportController::class)->name('products.export');
-    Route::get('products/search', ProductSearchController::class)->name('products.search');
-
-    Route::resource('products', ProductController::class);
-
-    Route::get('products/{product}/in-stock-serials', [StockAdjustmentController::class, 'serials'])->name('products.in-stock-serials');
-    Route::post('products/{product}/stock-adjustments', [StockAdjustmentController::class, 'store'])
-        ->name('stock-adjustments.store');
-
-    Route::post('products/bulk-delete', [ProductController::class, 'bulkDestroy'])
-        ->name('products.bulk-delete');
+        // My Shop Products
+        Route::patch('products/{shop_product}/toggle-status', [OwnerShopProductController::class, 'toggleStatus'])->name('products.toggle-status');
+        Route::resource('products', OwnerShopProductController::class)->parameters(['products' => 'shop_product'])->except(['show']);
+    });
 });

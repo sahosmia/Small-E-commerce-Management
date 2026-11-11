@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Shop extends Model
 {
@@ -51,6 +53,24 @@ class Shop extends Model
     }
 
     /**
+     * @return HasMany<ShopProduct, $this>
+     */
+    public function shopProducts(): HasMany
+    {
+        return $this->hasMany(ShopProduct::class);
+    }
+
+    /**
+     * @return BelongsToMany<Product, $this>
+     */
+    public function products(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'shop_products')
+            ->withPivot(['id', 'price', 'description', 'thumbnail', 'status'])
+            ->withTimestamps();
+    }
+
+    /**
      * Helper to get logo URL
      */
     public function logoUrl(): ?string
@@ -64,5 +84,13 @@ class Shop extends Model
         }
 
         return '/storage/'.$this->logo;
+    }
+
+    /**
+     * Check if shop is active.
+     */
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
     }
 }
