@@ -11,8 +11,11 @@ import AppLogo from './app-logo';
 export function AppSidebar() {
     const { shop, auth } = usePage<SharedData>().props;
     const { t } = useTranslation();
-    const permittedNavItems = filterNavByPermission(buildMainNavItems(shop.emi_module_enabled, t), auth.permissions);
-    const mainNavItems = applyMenuOrder(permittedNavItems, shop.menu_order);
+    const permittedNavItems = filterNavByPermission(
+        buildMainNavItems(shop?.emi_module_enabled ?? false, t, auth?.user),
+        auth?.permissions
+    );
+    const mainNavItems = applyMenuOrder(permittedNavItems, shop?.menu_order ?? null);
 
     return (
         <Sidebar collapsible="icon" variant="sidebar" className="border-sidebar-border print:hidden">

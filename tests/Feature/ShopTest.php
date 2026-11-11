@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Storage;
 
 test('a guest can view active shops on the home page', function () {
     $owner = User::factory()->create(['name' => 'John Merchant']);
+    $inactiveOwner = User::factory()->create(['name' => 'Jane Merchant']);
 
     $activeShop = Shop::create([
         'name' => 'Active Gadget Store',
@@ -18,7 +19,7 @@ test('a guest can view active shops on the home page', function () {
     $inactiveShop = Shop::create([
         'name' => 'Inactive Store',
         'slug' => 'inactive-store',
-        'user_id' => $owner->id,
+        'user_id' => $inactiveOwner->id,
         'status' => 'inactive',
     ]);
 

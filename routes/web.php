@@ -3,6 +3,8 @@
 use App\Http\Controllers\AppearanceController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\Owner\MyShopController;
+use App\Http\Controllers\Shops\PublicShopController;
 use App\Http\Controllers\Shops\ShopController;
 use App\Http\Controllers\ThemeColorController;
 use App\Models\Shop;
@@ -35,13 +37,24 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
+// Public shop detail page
+Route::get('/shop/{slug}', [PublicShopController::class, 'show'])->name('shops.public');
+
 Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
     Route::patch('locale', [LocaleController::class, 'update'])->name('locale.update');
     Route::patch('theme-color', [ThemeColorController::class, 'update'])->name('theme-color.update');
     Route::patch('appearance', [AppearanceController::class, 'update'])->name('appearance.update');
 
+    // Admin shop management
     Route::resource('shops', ShopController::class);
+    Route::patch('shops/{shop}/status', [ShopController::class, 'changeStatus'])->name('shops.status');
+    Route::patch('shops/{shop}/assign-owner', [ShopController::class, 'assignOwner'])->name('shops.assign-owner');
+
+    // Shop Owner "My Shop"
+    Route::get('my-shop', [MyShopController::class, 'show'])->name('my-shop.show');
+    Route::get('my-shop/edit', [MyShopController::class, 'edit'])->name('my-shop.edit');
+    Route::put('my-shop', [MyShopController::class, 'update'])->name('my-shop.update');
 });
 
 require __DIR__.'/inventory.php';
