@@ -56,7 +56,7 @@ class ShopSeeder extends Seeder
         ];
 
         foreach ($shops as $shopData) {
-            Shop::firstOrCreate(
+            Shop::updateOrCreate(
                 ['slug' => $shopData['slug']],
                 $shopData
             );

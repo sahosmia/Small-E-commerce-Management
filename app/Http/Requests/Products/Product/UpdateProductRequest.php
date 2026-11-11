@@ -3,8 +3,6 @@
 namespace App\Http\Requests\Products\Product;
 
 use App\Models\Product;
-use App\Rules\OpeningStockEditable;
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -12,54 +10,26 @@ class UpdateProductRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->isAdmin() ?? false;
     }
 
     /**
-     * A blank `sku`/`category_id` arrives as `''`/`0` from the form, not `null` —
-     * normalize both to `null` first so `nullable` actually treats them as absent
-     * (an unnormalized `''` would otherwise still hit the sku uniqueness check).
-     */
-    protected function prepareForValidation(): void
-    {
-        $this->merge([
-            'sku' => $this->filled('sku') ? $this->sku : null,
-            'category_id' => $this->filled('category_id') && (int) $this->category_id !== 0 ? $this->category_id : null,
-            // Optional — a product can be created before it has a price; blank means 0 (the column's default).
-            'selling_price' => $this->filled('selling_price') ? $this->selling_price : 0,
-        ]);
-    }
-
-    /**
-     * @return array<string, ValidationRule|array<mixed>|string>
+     * @return array<string, mixed>
      */
     public function rules(): array
     {
-        /** @var Product $product */
-        $product = $this->route('product');
+        $productId = $this->route('product') instanceof Product
+            ? $this->route('product')->id
+            : $this->route('product');
 
         return [
-            'name' => ['required', 'string', 'max:255', Rule::unique('products', 'name')->ignore($product->id)],
-            'sku' => ['nullable', 'string', 'max:255', Rule::unique('products', 'sku')->ignore($product->id)],
-            'barcode' => ['nullable', 'string', 'max:255', Rule::unique('products', 'barcode')->ignore($product->id)],
-            'category_id' => ['nullable', 'integer', 'exists:categories,id'],
-            'brand_id' => ['nullable', 'integer', 'exists:brands,id'],
-            'unit_id' => ['required', 'integer', 'exists:units,id'],
-            'selling_price' => ['nullable', 'numeric', 'min:0'],
-            'minimum_stock_level' => ['nullable', 'numeric', 'min:0'],
-            'manage_stock' => ['required', 'boolean'],
-            'is_for_sale' => ['required', 'boolean'],
-            'is_active' => ['required', 'boolean'],
-            'warranty_period_months' => ['nullable', 'integer', 'min:0'],
-            'has_installation_service' => ['required', 'boolean'],
-            'emi_available' => ['required', 'boolean'],
-            'track_serial_number' => ['required', 'boolean'],
-            'opening_stock' => ['nullable', 'numeric', new OpeningStockEditable($product)],
-            'opening_stock_cost' => ['required_if:opening_stock,!=,0', 'nullable', 'numeric', 'min:0'],
-            'image' => ['nullable', 'image', 'max:4096'],
-            'service_plan' => ['nullable', 'array'],
-            'service_plan.*.period_months' => ['required', 'integer', 'min:1'],
-            'service_plan.*.free_quota' => ['nullable', 'integer', 'min:0'],
+            'name' => ['required', 'string', 'max:255'],
+            'slug' => ['nullable', 'string', 'max:255', Rule::unique('products', 'slug')->ignore($productId)],
+            'sku' => ['required', 'string', 'max:100', Rule::unique('products', 'sku')->ignore($productId)],
+            'description' => ['nullable', 'string'],
+            'base_price' => ['required', 'numeric', 'min:0'],
+            'thumbnail' => ['nullable', 'image', 'max:2048'],
+            'is_active' => ['sometimes', 'boolean'],
         ];
     }
 }

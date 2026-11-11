@@ -46,4 +46,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('global-search', GlobalSearchController::class)->name('global-search');
 });
 
+require __DIR__.'/inventory.php';
+
 require __DIR__.'/auth.php';
