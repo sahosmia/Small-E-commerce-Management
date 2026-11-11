@@ -1,17 +1,8 @@
 import {
     type LucideIcon,
-    Boxes,
-    ClipboardList,
-    HandCoins,
     Package,
-    Receipt,
-    RotateCcw,
-    ShoppingBag,
-    Undo2,
-    UserPlus,
-    Wallet,
-    Wrench,
 } from 'lucide-react';
+import { type User } from '@/types';
 
 export interface QuickActionDefinition {
     key: string;
@@ -20,7 +11,7 @@ export interface QuickActionDefinition {
     /** The `module.action` permission needed — an action the user can't perform is never offered. */
     permission?: string;
     /** Resolved lazily: Ziggy's `route()` is only available once the app has booted. */
-    href: () => string;
+    href: (user?: User | null) => string;
 }
 
 /** What an admin saves in Business Settings: which actions are on, in the order they cycle through. */
@@ -29,15 +20,23 @@ export interface QuickActionSetting {
     enabled: boolean;
 }
 
+function isUserAdmin(user?: User | null): boolean {
+    const roleVal = user?.role;
+    return roleVal === 1 || (typeof roleVal === 'object' && roleVal !== null && 'value' in roleVal && (roleVal as { value: number }).value === 1);
+}
+
 /**
  * Every action the Ctrl+Space switcher can offer, in its default order. Keep the keys in sync with
  * `Settings::QUICK_ACTION_KEYS` on the backend. Pages without a standalone create route open their Add
  * modal on arrival through `?quick_create=1` (the same trick the header's Quick Create menu uses).
  */
 export const QUICK_ACTIONS: QuickActionDefinition[] = [
-   
-    { key: 'add_product', label: 'Add Product', icon: Package, href: () => route('products.create') },
-   
+    {
+        key: 'add_product',
+        label: 'Add Product',
+        icon: Package,
+        href: (user?: User | null) => isUserAdmin(user) ? route('admin.products.create') : route('owner.products.create'),
+    },
 ];
 
 /** On until an admin says otherwise — the extra actions stay off by default so the switcher starts short. */

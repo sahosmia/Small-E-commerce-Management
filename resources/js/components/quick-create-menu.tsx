@@ -8,8 +8,9 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { router } from '@inertiajs/react';
-import { Boxes, ClipboardList, type LucideIcon, Package, Plus, Receipt, RotateCcw, ShoppingBag, Undo2, UserPlus, Wallet, Wrench } from 'lucide-react';
+import { router, usePage } from '@inertiajs/react';
+import { type LucideIcon, Package, Plus } from 'lucide-react';
+import { type SharedData } from '@/types';
 
 interface QuickCreateItem {
     label: string;
@@ -22,19 +23,18 @@ interface QuickCreateGroup {
     items: QuickCreateItem[];
 }
 
-// Contacts/Expenses/Assets have no standalone create route, so they link to their
-// index with `?quick_create=1`, which auto-opens that page's Add modal (see its
-// `useEffect`). Built inside the component, not at module scope, since it calls Ziggy's `route()`.
-function buildGroups(): QuickCreateGroup[] {
+function buildGroups(isAdmin: boolean): QuickCreateGroup[] {
     return [
-        
-       
-      
         {
             heading: 'Catalog',
-            items: [{ label: 'New Product', icon: Package, href: route('products.create') }],
+            items: [
+                {
+                    label: isAdmin ? 'New Global Product' : 'Add New Product',
+                    icon: Package,
+                    href: isAdmin ? route('admin.products.create') : route('owner.products.create'),
+                },
+            ],
         },
-       
     ];
 }
 
@@ -43,7 +43,10 @@ function buildGroups(): QuickCreateGroup[] {
  * the app instead of only from each resource's own list page.
  */
 export default function QuickCreateMenu() {
-    const groups = buildGroups();
+    const { auth } = usePage<SharedData>().props;
+    const roleVal = auth?.user?.role;
+    const isAdmin = roleVal === 1 || (typeof roleVal === 'object' && roleVal !== null && 'value' in roleVal && (roleVal as { value: number }).value === 1);
+    const groups = buildGroups(isAdmin);
 
     return (
         <DropdownMenu>

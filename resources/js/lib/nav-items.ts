@@ -7,10 +7,11 @@ import {
 } from 'lucide-react';
 
 export function buildMainNavItems(
-    emiModuleEnabled: boolean,
+    _emiModuleEnabled: boolean,
     user?: User | null
 ): NavItem[] {
-    const isAdmin = user ? (user.role === 1 || (typeof user.role === 'object' && (user.role as any)?.value === 1)) : false;
+    const roleVal = user?.role;
+    const isAdmin = roleVal === 1 || (typeof roleVal === 'object' && roleVal !== null && 'value' in roleVal && (roleVal as { value: number }).value === 1);
 
     if (isAdmin) {
         return [
@@ -41,13 +42,13 @@ export function buildMainNavItems(
                 ],
             },
             {
-                key: 'product',
+                key: 'global_products',
                 title: 'Global Products',
                 url: '/admin/products',
                 icon: Package,
                 items: [
-                    { key: 'products', title: 'All Products', url: '/admin/products' },
-                    { key: 'add_product', title: 'Create Product', url: '/admin/products/create' },
+                    { key: 'all_global_products', title: 'All Products', url: '/admin/products' },
+                    { key: 'create_global_product', title: 'Create Product', url: '/admin/products/create' },
                 ],
             },
         ];
@@ -93,6 +94,6 @@ export function buildMainNavItems(
     ];
 }
 
-export function filterNavByPermission(items: NavItem[], _permissions?: string[]): NavItem[] {
+export function filterNavByPermission(items: NavItem[]): NavItem[] {
     return items;
 }

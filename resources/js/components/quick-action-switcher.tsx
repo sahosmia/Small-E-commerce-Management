@@ -37,10 +37,10 @@ export default function QuickActionSwitcher() {
             show(false);
 
             if (action) {
-                router.visit(action.href());
+                router.visit(action.href(auth.user));
             }
         },
-        [show],
+        [show, auth.user],
     );
 
     useEffect(() => {
