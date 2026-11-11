@@ -1,6 +1,8 @@
 <?php
 
+use App\Models\Product;
 use App\Models\Shop;
+use App\Models\ShopProduct;
 use App\Models\User;
 
 test('shop owner can view their own shop page', function () {
@@ -67,7 +69,7 @@ test('shop owner can edit their own shop details', function () {
     expect($shop->owner_id)->toBe($owner->id);
 });
 
-test('public user can view an active shop page by slug', function () {
+test('public user can view an active shop page by slug with assigned products', function () {
     $owner = User::factory()->shopOwner()->create();
     $shop = Shop::create([
         'name' => 'Public Gadget Store',
@@ -77,6 +79,40 @@ test('public user can view an active shop page by slug', function () {
         'description' => 'Best gadgets in town',
     ]);
 
+    $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+    $activeProduct = Product::create([
+        'created_by' => $admin->id,
+        'name' => 'Active Product',
+        'slug' => 'active-product',
+        'sku' => 'ACT-001',
+        'base_price' => 1000.00,
+        'is_active' => true,
+    ]);
+
+    $inactiveProduct = Product::create([
+        'created_by' => $admin->id,
+        'name' => 'Inactive Global Product',
+        'slug' => 'inactive-global-product',
+        'sku' => 'INACT-001',
+        'base_price' => 2000.00,
+        'is_active' => false,
+    ]);
+
+    ShopProduct::create([
+        'shop_id' => $shop->id,
+        'product_id' => $activeProduct->id,
+        'price' => 1200.00,
+        'status' => true,
+    ]);
+
+    ShopProduct::create([
+        'shop_id' => $shop->id,
+        'product_id' => $inactiveProduct->id,
+        'price' => 2200.00,
+        'status' => true,
+    ]);
+
     $response = $this->get('/shop/public-gadget-store');
 
     $response->assertOk();
@@ -84,6 +120,9 @@ test('public user can view an active shop page by slug', function () {
         ->component('shops/public')
         ->where('shop.name', 'Public Gadget Store')
         ->where('shop.slug', 'public-gadget-store')
+        ->has('shop.products', 1)
+        ->where('shop.products.0.name', 'Active Product')
+        ->where('shop.products.0.price', 1200)
     );
 });
 

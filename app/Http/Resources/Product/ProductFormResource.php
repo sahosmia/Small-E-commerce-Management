@@ -18,7 +18,7 @@ class ProductFormResource extends JsonResource
             'sku' => $product->sku,
             'is_active' => $product->is_active,
             'image_url' => $product->imageUrl(),
-            
+
         ];
     }
 }
