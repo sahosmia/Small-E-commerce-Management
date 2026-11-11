@@ -1,10 +1,8 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\GlobalSearchController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Owner\MyShopController;
-use App\Http\Controllers\Products\ProductController;
 use App\Http\Controllers\Shops\PublicShopController;
 use App\Http\Controllers\Shops\ShopController;
 use App\Http\Controllers\Users\UserController;
@@ -33,11 +31,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('my-shop/edit', [MyShopController::class, 'edit'])->name('my-shop.edit');
     Route::put('my-shop', [MyShopController::class, 'update'])->name('my-shop.update');
 
-    // Products management
-    Route::resource('products', ProductController::class);
 
-    // Global Search
-    Route::get('global-search', GlobalSearchController::class)->name('global-search');
 });
 
 require __DIR__.'/inventory.php';
