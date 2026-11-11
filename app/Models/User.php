@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -48,6 +49,16 @@ class User extends Authenticatable
             'is_active' => 'boolean',
             'role' => UserRole::class,
         ];
+    }
+
+    /**
+     * Get the shop associated with this owner.
+     *
+     * @return HasOne<Shop, $this>
+     */
+    public function shop(): HasOne
+    {
+        return $this->hasOne(Shop::class, 'owner_id');
     }
 
     public function isAdmin(): bool
