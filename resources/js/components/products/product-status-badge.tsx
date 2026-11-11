@@ -1,6 +1,5 @@
 import { StatusBadge } from '@/components/shared/status-badge';
 import { Badge } from '@/components/ui/badge';
-import { useTranslation } from '@/hooks/use-translation';
 import { type StockStatus } from '@/types/models';
 
 interface ProductStatusBadgeProps {
@@ -15,12 +14,11 @@ interface ProductStatusBadgeProps {
 
 /** Stock-status + Inactive badges — shown identically in the table's Status column and the mobile card. */
 export default function ProductStatusBadge({ product, hideStockStatus = false }: ProductStatusBadgeProps) {
-    const { t } = useTranslation();
-
+    
     const stockStatusLabel: Record<StockStatus, string> = {
-        in_stock: t('productList', 'in_stock'),
-        low_stock: t('productList', 'low_stock'),
-        out_of_stock: t('productList', 'out_of_stock'),
+        in_stock: "In Stock",
+        low_stock: "Low Stock",
+        out_of_stock: "Out of Stock",
     };
 
     return (
@@ -28,9 +26,9 @@ export default function ProductStatusBadge({ product, hideStockStatus = false }:
             {product.manage_stock ? (
                 !hideStockStatus && <StatusBadge status={product.stock_status} label={stockStatusLabel[product.stock_status]} />
             ) : (
-                <Badge variant="outline">{t('productList', 'service_item')}</Badge>
+                <Badge variant="outline">{"Service Item"}</Badge>
             )}
-            {!product.is_active && <StatusBadge status="inactive" label={t('productList', 'inactive')} />}
+            {!product.is_active && <StatusBadge status="inactive" label={"Inactive"} />}
         </span>
     );
 }

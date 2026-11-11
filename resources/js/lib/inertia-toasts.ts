@@ -6,9 +6,6 @@ import { toast } from 'sonner';
  * reflects the result (theme flips, language switches, you land on the dashboard...).
  */
 const SILENT_PATHS = [
-    '/appearance',
-    '/locale',
-    '/theme-color',
     '/login',
     '/logout',
     '/confirm-password',

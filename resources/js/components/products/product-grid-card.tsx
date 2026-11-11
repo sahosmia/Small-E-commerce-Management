@@ -4,7 +4,6 @@ import { ProductImage } from '@/components/products/product-image';
 import ProductStatusBadge from '@/components/products/product-status-badge';
 import StockQuantity from '@/components/products/stock-quantity';
 import { useMoneyFormat } from '@/hooks/use-money-format';
-import { useTranslation } from '@/hooks/use-translation';
 import { cn } from '@/lib/utils';
 import { type ProductListItem } from '@/types/models';
 import { Link } from '@inertiajs/react';
@@ -19,8 +18,7 @@ interface ProductGridCardProps {
 /** Rendered by `DataTable` in Grid view — styled with contacts list grid language. */
 export default function ProductGridCard({ product, selected, onToggleSelected, actions }: ProductGridCardProps) {
     const money = useMoneyFormat();
-    const { t } = useTranslation();
-
+    
     const isLowStock = product.manage_stock && product.current_stock <= product.minimum_stock_level;
     const isOutOfStock = product.manage_stock && product.current_stock <= 0;
 
@@ -60,10 +58,10 @@ export default function ProductGridCard({ product, selected, onToggleSelected, a
                 <span className="text-muted-foreground text-xs font-medium">
                     {product.manage_stock ? (
                         <>
-                            <StockQuantity product={product} /> {t('productList', 'in_stock_suffix')}
+                            <StockQuantity product={product} /> {"in stock"}
                         </>
                     ) : (
-                        t('productList', 'service_item')
+                        "Service Item"
                     )}
                 </span>
                 <div className="flex items-center gap-2">

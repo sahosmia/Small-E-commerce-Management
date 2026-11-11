@@ -6,7 +6,6 @@ import { ServiceWarrantySection } from '@/components/products/form/service-warra
 import { type ProductFormData } from '@/components/products/form/types';
 import { useLookupAutoSelect } from '@/components/products/form/use-lookup-auto-select';
 import { VisibilityMediaSection } from '@/components/products/form/visibility-media-section';
-import { useTranslation } from '@/hooks/use-translation';
 import { useUnsavedChangesWarning } from '@/hooks/use-unsaved-changes-warning';
 import { type Brand, type Category, type ProductDetail, type Unit } from '@/types/models';
 import { useForm } from '@inertiajs/react';
@@ -26,8 +25,7 @@ interface ProductFormProps {
  * (basic info, pricing & stock, service & warranty, visibility & media) is its own component under `./form/`.
  */
 export default function ProductForm({ mode, product, categories, brands, units }: ProductFormProps) {
-    const { t } = useTranslation();
-
+    
     const form = useForm<ProductFormData>({
         name: product?.name ?? '',
         sku: product?.sku ?? '',
@@ -60,7 +58,7 @@ export default function ProductForm({ mode, product, categories, brands, units }
         const options = {
             forceFormData: true,
             onSuccess: () => {
-                toast.success(mode === 'create' ? t('productForm', 'created_toast') : t('productForm', 'updated_toast'));
+                toast.success(mode === 'create' ? "Product created." : "Product updated.");
                 if (mode === 'create') form.reset();
             },
         };

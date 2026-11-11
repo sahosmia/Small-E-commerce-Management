@@ -4,7 +4,6 @@ import { ReadOnlyField } from '@/components/form/read-only-field';
 import { ToggleRow } from '@/components/form/toggle-row';
 import { type ProductFormApi } from '@/components/products/form/types';
 import MoneyInput from '@/components/shared/money-input';
-import { useTranslation } from '@/hooks/use-translation';
 import { type ProductDetail } from '@/types/models';
 import { CircleDollarSign, Info, Layers, Package, Settings2 } from 'lucide-react';
 
@@ -18,19 +17,18 @@ interface PricingStockSectionProps {
 
 /** Selling price, reorder level, the manage-stock switch and (when it's on) the opening stock. */
 export function PricingStockSection({ form, mode, product, canSetOpeningStock }: PricingStockSectionProps) {
-    const { t } = useTranslation();
-
+    
     return (
         <FormSection
             icon={CircleDollarSign}
-            title={t('productForm', 'pricing_stock')}
+            title={"Pricing & Stock"}
             description="Selling price, stock level এবং opening stock"
             accent="emerald"
         >
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <MoneyInput
                     id="selling_price"
-                    label={t('productForm', 'selling_price')}
+                    label={"Selling Price"}
                     value={form.data.selling_price}
                     onChange={(e) => form.setData('selling_price', Number(e.target.value))}
                     error={form.errors.selling_price}
@@ -38,7 +36,7 @@ export function PricingStockSection({ form, mode, product, canSetOpeningStock }:
 
                 <FormInput
                     id="minimum_stock_level"
-                    label={t('productForm', 'minimum_stock_level')}
+                    label={"Minimum Stock Level"}
                     type="number"
                     step="1"
                     value={form.data.minimum_stock_level}
@@ -52,9 +50,9 @@ export function PricingStockSection({ form, mode, product, canSetOpeningStock }:
                 {mode === 'edit' && product && (
                     <ReadOnlyField
                         id="current_stock"
-                        label={t('productForm', 'current_stock')}
+                        label={"Current Stock"}
                         value={product.current_stock}
-                        helperText={t('productForm', 'current_stock_locked')}
+                        helperText={"Can't be changed here — use Stock Adjustment"}
                     />
                 )}
             </div>
@@ -62,8 +60,8 @@ export function PricingStockSection({ form, mode, product, canSetOpeningStock }:
             <div className="mt-4">
                 <ToggleRow
                     id="manage_stock"
-                    label={t('productForm', 'manage_stock')}
-                    description={t('productForm', 'manage_stock_description')}
+                    label={"Manage Stock"}
+                    description={"When off, this is a service item (Installation Charge) — stock won't be tracked"}
                     checked={form.data.manage_stock}
                     onCheckedChange={(checked) => form.setData('manage_stock', checked)}
                     icon={Settings2}
@@ -76,7 +74,7 @@ export function PricingStockSection({ form, mode, product, canSetOpeningStock }:
                         <div className="grid gap-4 sm:grid-cols-2">
                             <FormInput
                                 id="opening_stock"
-                                label={t('productForm', 'opening_stock')}
+                                label={"Opening Stock"}
                                 type="number"
                                 step="1"
                                 value={form.data.opening_stock}
@@ -88,7 +86,7 @@ export function PricingStockSection({ form, mode, product, canSetOpeningStock }:
 
                             <MoneyInput
                                 id="opening_stock_cost"
-                                label={t('productForm', 'opening_stock_cost')}
+                                label={"Opening Stock Unit Cost"}
                                 value={form.data.opening_stock_cost}
                                 onChange={(e) => form.setData('opening_stock_cost', Number(e.target.value))}
                                 error={form.errors.opening_stock_cost}
@@ -97,7 +95,7 @@ export function PricingStockSection({ form, mode, product, canSetOpeningStock }:
                     ) : (
                         <div className="text-muted-foreground flex items-center gap-2 text-sm">
                             <Info className="size-4 shrink-0" />
-                            {t('productForm', 'opening_stock_locked')}
+                            {"This product already has stock movement — opening stock can no longer be changed, use Stock Adjustment."}
                         </div>
                     )}
                 </div>

@@ -53,8 +53,6 @@ export interface SharedData {
         pagination_options: number[];
         pagination_default: number;
         pagination_allow_all: boolean;
-        /** Shop-wide default accent palette — see ThemeColorValue. */
-        theme_color: string;
         /** Admin-configured sidebar order (corrections.md #8) — null/missing keys fall back to the built-in order. */
         menu_order: { top: string[]; sub: Record<string, string[]> } | null;
         /** Ctrl+Space switcher: which actions are on and their order — null until an admin saves a list. */
@@ -73,12 +71,6 @@ export interface User {
     role?: number;
     is_active?: boolean;
     avatar?: string;
-    /** UI language preference (Phase 33 §4) — 'en' or 'bn', default 'en'. */
-    locale: string;
-    /** Personal accent-color override — null means "use the shop's global theme_color". */
-    theme_color: string | null;
-    /** Dark/light preference (Phase 33-equivalent, corrections.md #7) — 'light' | 'dark' | 'system', default 'system'. */
-    appearance: string;
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;

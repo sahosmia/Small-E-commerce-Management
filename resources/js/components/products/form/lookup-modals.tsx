@@ -1,6 +1,5 @@
 import { type LookupKind } from '@/components/products/form/types';
 import LookupManagerModal from '@/components/products/lookup-manager-modal';
-import { useTranslation } from '@/hooks/use-translation';
 import { type Brand, type Category, type Unit } from '@/types/models';
 
 interface LookupModalsProps {
@@ -16,8 +15,7 @@ interface LookupModalsProps {
 
 /** The create / rename / delete modals behind the "+" buttons for Category, Brand and Unit. */
 export function LookupModals({ active, onClose, onCreated, categories, brands, units }: LookupModalsProps) {
-    const { t } = useTranslation();
-    const closeUnless = (kind: LookupKind) => (open: boolean) => {
+        const closeUnless = (kind: LookupKind) => (open: boolean) => {
         if (!open && active === kind) onClose();
     };
 
@@ -26,7 +24,7 @@ export function LookupModals({ active, onClose, onCreated, categories, brands, u
             <LookupManagerModal
                 open={active === 'category'}
                 onOpenChange={closeUnless('category')}
-                title={t('productForm', 'manage_categories')}
+                title={"Manage Categories"}
                 items={categories}
                 storeRouteName="categories.store"
                 updateRouteName="categories.update"
@@ -38,7 +36,7 @@ export function LookupModals({ active, onClose, onCreated, categories, brands, u
             <LookupManagerModal
                 open={active === 'brand'}
                 onOpenChange={closeUnless('brand')}
-                title={t('productForm', 'manage_brands')}
+                title={"Manage Brands"}
                 items={brands}
                 storeRouteName="brands.store"
                 updateRouteName="brands.update"
@@ -49,7 +47,7 @@ export function LookupModals({ active, onClose, onCreated, categories, brands, u
             <LookupManagerModal
                 open={active === 'unit'}
                 onOpenChange={closeUnless('unit')}
-                title={t('productForm', 'manage_units')}
+                title={"Manage Units"}
                 items={units}
                 storeRouteName="units.store"
                 updateRouteName="units.update"

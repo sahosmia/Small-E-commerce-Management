@@ -12,7 +12,6 @@ import PageHeader from '@/components/shared/page-header';
 import { Button } from '@/components/ui/button';
 import { useListPage } from '@/hooks/table/use-list-page';
 import { useConfirmDelete } from '@/hooks/use-confirm-delete';
-import { useTranslation } from '@/hooks/use-translation';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { type ProductListItem } from '@/types/models';
@@ -35,8 +34,7 @@ const PRODUCT_EXPORT_COLUMN_MAP: Record<string, string[]> = {
 };
 
 export default function ProductsIndex({ products, stats, categories, brands, filters }: ProductsIndexProps) {
-    const { t } = useTranslation();
-    const breadcrumbs: BreadcrumbItem[] = [{ title: t('productsPage', 'title'), href: '/products' }];
+        const breadcrumbs: BreadcrumbItem[] = [{ title: "Products", href: '/products' }];
 
     const [adjusting, setAdjusting] = useState<ProductListItem | null>(null);
 
@@ -58,8 +56,8 @@ export default function ProductsIndex({ products, stats, categories, brands, fil
     const deletion = useConfirmDelete<ProductListItem>({
         routeName: 'products.destroy',
         errorKey: 'product',
-        fallbackError: t('productsPage', 'delete_error'),
-        successMessage: (product) => `"${product.name}" ${t('productsPage', 'deleted_toast')}`,
+        fallbackError: "Could not delete product.",
+        successMessage: (product) => `"${product.name}" ${"deleted."}`,
     });
 
     const columns = useProductColumns({
@@ -73,15 +71,15 @@ export default function ProductsIndex({ products, stats, categories, brands, fil
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={t('productsPage', 'title')} />
+            <Head title={"Products"} />
 
             <div className="space-y-6 px-4 py-6">
                 <PageHeader
                     icon={Package}
                     iconClassName="bg-violet-500/10 text-violet-600 ring-1 ring-violet-500/20 dark:text-violet-400"
-                    title={t('productsPage', 'title')}
-                    description={t('productsPage', 'description')}
-                    actions={<AddButton href={route('products.create')} title={t('productsPage', 'add_product')} />}
+                    title={"Products"}
+                    description={"All products — with stock, price and profit margin"}
+                    actions={<AddButton href={route('products.create')} title={"Add Product"} />}
                 />
 
                 {stats && <ProductStatCards stats={stats} />}
@@ -103,10 +101,10 @@ export default function ProductsIndex({ products, stats, categories, brands, fil
                             actions={getProductActions(product, { onAdjustStock: setAdjusting, onDelete: deletion.setTarget })}
                         />
                     )}
-                    itemLabel={t('productsPage', 'item_label')}
-                    searchPlaceholder={t('productsPage', 'search_placeholder')}
-                    visibilityColumns={getVisibilityColumns(t)}
-                    exportColumns={getExportColumns(t)}
+                    itemLabel={"products"}
+                    searchPlaceholder={"Name, SKU or barcode"}
+                    visibilityColumns={getVisibilityColumns()}
+                    exportColumns={getExportColumns()}
                     filterSlot={
                         <ProductFilters
                             categoryId={filters.category_id}
@@ -118,14 +116,14 @@ export default function ProductsIndex({ products, stats, categories, brands, fil
                         />
                     }
                     emptyState={
-                        <EmptyState title={t('productsPage', 'empty_title')} description={t('productsPage', 'empty_description')}>
-                            <AddButton href={route('products.create')} title={t('productsPage', 'add_product')} className="mt-2" />
+                        <EmptyState title={"No products yet"} description={"Add your first product"}>
+                            <AddButton href={route('products.create')} title={"Add Product"} className="mt-2" />
                         </EmptyState>
                     }
                     filteredEmptyState={
-                        <EmptyState title={t('common', 'no_results_title')} description={t('common', 'no_results_description')}>
+                        <EmptyState title={"No results"} description={"Try a different search or filter"}>
                             <Button className="mt-2" variant="outline" onClick={list.resetFilters}>
-                                {t('common', 'clear_filters')}
+                                {"Clear filters"}
                             </Button>
                         </EmptyState>
                     }
@@ -137,9 +135,9 @@ export default function ProductsIndex({ products, stats, categories, brands, fil
             <ConfirmDialog
                 open={deletion.target !== null}
                 onOpenChange={(open) => !open && deletion.setTarget(null)}
-                title={t('productsPage', 'delete_title')}
-                description={`"${deletion.target?.name}" ${t('productsPage', 'delete_description')}`}
-                confirmLabel={t('common', 'delete')}
+                title={"Delete product?"}
+                description={`"${deletion.target?.name}" ${"will be deleted. Cannot be done if it has stock movement."}`}
+                confirmLabel={"Delete"}
                 onConfirm={deletion.confirm}
             />
         </AppLayout>

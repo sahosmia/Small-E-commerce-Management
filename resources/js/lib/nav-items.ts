@@ -1,4 +1,3 @@
-import { type useTranslation } from '@/hooks/use-translation';
 import { type NavItem, type User } from '@/types';
 import {
     LayoutGrid,
@@ -9,7 +8,6 @@ import {
 
 export function buildMainNavItems(
     emiModuleEnabled: boolean,
-    t: ReturnType<typeof useTranslation>['t'],
     user?: User | null
 ): NavItem[] {
     const isAdmin = user ? (user.role === 1 || (typeof user.role === 'object' && (user.role as any)?.value === 1)) : false;
@@ -18,7 +16,7 @@ export function buildMainNavItems(
         return [
             {
                 key: 'dashboard',
-                title: t('nav', 'dashboard'),
+                title: 'Dashboard',
                 url: '/dashboard',
                 icon: LayoutGrid,
             },
@@ -34,7 +32,7 @@ export function buildMainNavItems(
             },
             {
                 key: 'users',
-                title: t('nav', 'users'),
+                title: 'Users',
                 url: '/users',
                 icon: Users,
                 items: [
@@ -59,7 +57,7 @@ export function buildMainNavItems(
     return [
         {
             key: 'dashboard',
-            title: t('nav', 'dashboard'),
+            title: 'Dashboard',
             url: '/dashboard',
             icon: LayoutGrid,
         },

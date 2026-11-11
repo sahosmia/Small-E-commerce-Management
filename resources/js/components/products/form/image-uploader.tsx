@@ -1,7 +1,6 @@
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { useTranslation } from '@/hooks/use-translation';
 import { ImagePlus, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -16,8 +15,7 @@ interface ImageUploaderProps {
 
 /** Click-to-upload image field with a preview and Replace / Remove once something is chosen. */
 export function ImageUploader({ file, savedUrl, onChange, error }: ImageUploaderProps) {
-    const { t } = useTranslation();
-    const inputRef = useRef<HTMLInputElement>(null);
+        const inputRef = useRef<HTMLInputElement>(null);
     const [objectUrl, setObjectUrl] = useState<string | null>(null);
 
     // Preview URL for the chosen file — released when the file changes, and the native input cleared when the
@@ -40,7 +38,7 @@ export function ImageUploader({ file, savedUrl, onChange, error }: ImageUploader
 
     return (
         <div className="grid gap-2">
-            <Label htmlFor="image">{t('productForm', 'product_image')}</Label>
+            <Label htmlFor="image">{"Product Image"}</Label>
 
             <input
                 ref={inputRef}

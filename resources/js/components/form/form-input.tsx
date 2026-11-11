@@ -1,6 +1,5 @@
 import { FormField, fieldAriaProps } from '@/components/form/form-field';
 import { Input, type InputProps } from '@/components/ui/input';
-import { useTranslation } from '@/hooks/use-translation';
 import { cn } from '@/lib/utils';
 import { type LucideIcon } from 'lucide-react';
 import React from 'react';
@@ -20,7 +19,6 @@ interface FormInputProps extends Omit<InputProps, 'leadingIcon'> {
 const TEXT_TYPES = new Set(['text', 'email', 'tel', 'url', 'search', 'password']);
 
 export function FormInput({ id, label, tooltip, error, helperText, required, className, icon: Icon, placeholder, type, ...props }: FormInputProps) {
-    const { t } = useTranslation();
     const aria = fieldAriaProps(id, error, helperText);
 
     // Explicit placeholders always win; otherwise derive one so no field is left blank.
@@ -29,7 +27,7 @@ export function FormInput({ id, label, tooltip, error, helperText, required, cla
         (type === 'number'
             ? '0'
             : typeof label === 'string' && TEXT_TYPES.has(type ?? 'text')
-              ? t('common', 'enter_placeholder').replace('{label}', label)
+              ? `Enter ${label.toLowerCase()}...`
               : undefined);
 
     return (

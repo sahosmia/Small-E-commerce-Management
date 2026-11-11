@@ -2,14 +2,12 @@ import { FormInput } from '@/components/form/form-input';
 import InputError from '@/components/input-error';
 import { type ProductFormApi } from '@/components/products/form/types';
 import { Button } from '@/components/ui/button';
-import { useTranslation } from '@/hooks/use-translation';
 import { type ServicePlanPeriod } from '@/types/models';
 import { Plus, Sparkles, Trash2 } from 'lucide-react';
 
 /** The free-service schedule of an installable product: a list of (duration in months, free visits) rows. */
 export function ServicePlanEditor({ form }: { form: ProductFormApi }) {
-    const { t } = useTranslation();
-    const periods = form.data.service_plan;
+        const periods = form.data.service_plan;
 
     const addPeriod = () => form.setData('service_plan', [...periods, { period_months: 12, free_quota: 0 }]);
 
@@ -31,13 +29,13 @@ export function ServicePlanEditor({ form }: { form: ProductFormApi }) {
                 <div className="flex items-center gap-2">
                     <Sparkles className="size-4 text-violet-500" />
                     <div>
-                        <div className="text-sm font-medium">{t('productForm', 'service_plan')}</div>
-                        <p className="text-muted-foreground text-xs">{t('productForm', 'service_plan_description')}</p>
+                        <div className="text-sm font-medium">{"Service Plan"}</div>
+                        <p className="text-muted-foreground text-xs">{"Free services per period — e.g. AC: Year 1 = 2 free, Year 2 = 0"}</p>
                     </div>
                 </div>
                 <Button type="button" variant="outline" size="sm" onClick={addPeriod} className="gap-1.5">
                     <Plus className="size-3.5" />
-                    {t('productForm', 'add_period')}
+                    {"Add Period"}
                 </Button>
             </div>
 
@@ -45,14 +43,14 @@ export function ServicePlanEditor({ form }: { form: ProductFormApi }) {
                 {periods.length === 0 ? (
                     <div className="flex flex-col items-center gap-2 rounded-md border border-dashed py-6 text-center">
                         <Sparkles className="text-muted-foreground size-5" />
-                        <p className="text-muted-foreground text-xs">{t('productForm', 'no_periods_yet')}</p>
+                        <p className="text-muted-foreground text-xs">{"No period added yet — without one, free service won't be tracked"}</p>
                     </div>
                 ) : (
                     <div className="space-y-2">
                         {/* Header row (desktop only) */}
                         <div className="text-muted-foreground hidden grid-cols-[1fr_1fr_auto] gap-3 px-1 text-[10px] font-semibold tracking-wide uppercase sm:grid">
-                            <span>{t('productForm', 'duration_months')}</span>
-                            <span>{t('productForm', 'free_quota')}</span>
+                            <span>{"Duration (months)"}</span>
+                            <span>{"Free Quota"}</span>
                             <span className="w-9" />
                         </div>
 
@@ -63,7 +61,7 @@ export function ServicePlanEditor({ form }: { form: ProductFormApi }) {
                             >
                                 <FormInput
                                     id={`service-period-months-${index}`}
-                                    label={`#${index + 1} · ${t('productForm', 'duration_months')}`}
+                                    label={`#${index + 1} · ${"Duration (months)"}`}
                                     type="number"
                                     min={1}
                                     value={period.period_months}
@@ -72,7 +70,7 @@ export function ServicePlanEditor({ form }: { form: ProductFormApi }) {
                                 />
                                 <FormInput
                                     id={`service-period-free-quota-${index}`}
-                                    label={t('productForm', 'free_quota')}
+                                    label={"Free Quota"}
                                     type="number"
                                     min={0}
                                     value={period.free_quota}

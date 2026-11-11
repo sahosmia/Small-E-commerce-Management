@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { UserMenuContent } from '@/components/user-menu-content';
-import { useInitials } from '@/hooks/use-initials';
+import { getInitials } from '@/lib/utils';
 import { type SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
 import { ChevronDown } from 'lucide-react';
@@ -14,7 +14,6 @@ import { ChevronDown } from 'lucide-react';
  */
 export default function HeaderUserMenu() {
     const { auth } = usePage<SharedData>().props;
-    const getInitials = useInitials();
     const user = auth.user;
 
     return (

@@ -1,4 +1,3 @@
-import { useGlobalAppearance } from '@/hooks/use-appearance';
 import { CircleAlert, CircleCheck, CircleX, Info, Loader2 } from 'lucide-react';
 import { Toaster as SonnerToaster, type ToasterProps } from 'sonner';
 
@@ -39,7 +38,5 @@ const toastOptions: ToasterProps['toastOptions'] = {
 };
 
 export default function Toaster() {
-    const appearance = useGlobalAppearance();
-
-    return <SonnerToaster theme={appearance} position="top-right" closeButton icons={icons} toastOptions={toastOptions} gap={8} visibleToasts={4} />;
+    return <SonnerToaster theme="light" position="top-right" closeButton icons={icons} toastOptions={toastOptions} gap={8} visibleToasts={4} />;
 }

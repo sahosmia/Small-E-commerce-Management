@@ -1,5 +1,4 @@
 import { FormField, fieldAriaProps } from '@/components/form/form-field';
-import { useTranslation } from '@/hooks/use-translation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type LucideIcon } from 'lucide-react';
 import React from 'react';
@@ -41,9 +40,8 @@ export function FormSelect({
     required = false,
     icon: Icon,
 }: FormSelectProps) {
-    const { t } = useTranslation();
     const currentValue = value ? String(value) : allowNone ? 'none' : '';
-    const resolvedPlaceholder = placeholder ?? (typeof label === 'string' ? t('common', 'select_placeholder').replace('{label}', label) : undefined);
+    const resolvedPlaceholder = placeholder ?? (typeof label === 'string' ? `Select ${label.toLowerCase()}...` : undefined);
 
     return (
         <FormField id={id} label={label} tooltip={tooltip} required={required} error={error} helperText={helperText}>

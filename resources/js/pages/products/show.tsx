@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useMoneyFormat } from '@/hooks/use-money-format';
-import { useTranslation } from '@/hooks/use-translation';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate } from '@/lib/format-date';
 import { cn } from '@/lib/utils';
@@ -81,12 +80,11 @@ function InfoRow({ label, value, mono }: { label: string; value: React.ReactNode
 export default function ProductShow({ product, movements }: ProductShowProps) {
     const { shop } = usePage<SharedData>().props;
     const money = useMoneyFormat();
-    const { t } = useTranslation();
-
+    
     const [adjustingProduct, setAdjustingProduct] = useState<ProductListItem | null>(null);
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: t('nav', 'products'), href: route('products.index') },
+        { title: "Products", href: route('products.index') },
         { title: product.name, href: route('products.show', product.id) },
     ];
 

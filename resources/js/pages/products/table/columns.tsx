@@ -7,8 +7,6 @@ import { ProductImage } from '@/components/products/product-image';
 import ProductStatusBadge from '@/components/products/product-status-badge';
 import StockQuantity from '@/components/products/stock-quantity';
 import { useMoneyFormat } from '@/hooks/use-money-format';
-import { useTranslation } from '@/hooks/use-translation';
-import { type Dictionary } from '@/lib/translations/en';
 import { type ProductListItem } from '@/types/models';
 import { type ColumnDef } from '@tanstack/react-table';
 import { useMemo } from 'react';
@@ -30,37 +28,36 @@ interface UseProductColumnsOptions {
 }
 
 /** The Table view's toggleable columns (Product bundles name+sku+image, so it's coarser than the export columns below). */
-export const getVisibilityColumns = (t: <S extends keyof Dictionary>(section: S, key: keyof Dictionary[S]) => string): DataTableColumnOption[] => [
-    { id: 'product', label: t('productColumns', 'product') },
-    { id: 'category', label: t('productColumns', 'category_brand') },
-    { id: 'stock', label: t('productColumns', 'stock') },
-    { id: 'pap', label: t('productColumns', 'pap') },
-    { id: 'tpp', label: t('productColumns', 'tpp') },
-    { id: 'price', label: t('productColumns', 'price') },
-    { id: 'margin', label: t('productColumns', 'margin') },
-    { id: 'status', label: t('productColumns', 'status') },
+export const getVisibilityColumns = (): DataTableColumnOption[] => [
+    { id: 'product', label: "Product" },
+    { id: 'category', label: "Category / Brand" },
+    { id: 'stock', label: "Stock" },
+    { id: 'pap', label: "Purchase Average Price (P.A.P)" },
+    { id: 'tpp', label: "Total Purchase Price (T.P.P)" },
+    { id: 'price', label: "Selling Price" },
+    { id: 'margin', label: "Margin" },
+    { id: 'status', label: "Status" },
 ];
 
 /** Fine-grained export columns — matches `ProductExportController::COLUMN_LABELS` on the backend. */
-export const getExportColumns = (t: <S extends keyof Dictionary>(section: S, key: keyof Dictionary[S]) => string): DataTableColumnOption[] => [
-    { id: 'name', label: t('common', 'name') },
-    { id: 'sku', label: t('productColumns', 'sku') },
-    { id: 'barcode', label: t('productColumns', 'barcode') },
-    { id: 'category', label: t('nav', 'category') },
-    { id: 'brand', label: t('nav', 'brand') },
-    { id: 'stock', label: t('productColumns', 'stock') },
-    { id: 'pap', label: t('productColumns', 'pap') },
-    { id: 'tpp', label: t('productColumns', 'tpp') },
-    { id: 'price', label: t('productColumns', 'price') },
-    { id: 'margin', label: t('productColumns', 'margin_percent') },
-    { id: 'status', label: t('productColumns', 'status') },
+export const getExportColumns = (): DataTableColumnOption[] => [
+    { id: 'name', label: "Name" },
+    { id: 'sku', label: "SKU" },
+    { id: 'barcode', label: "Barcode" },
+    { id: 'category', label: "Category" },
+    { id: 'brand', label: "Brand" },
+    { id: 'stock', label: "Stock" },
+    { id: 'pap', label: "Purchase Average Price (P.A.P)" },
+    { id: 'tpp', label: "Total Purchase Price (T.P.P)" },
+    { id: 'price', label: "Selling Price" },
+    { id: 'margin', label: "Margin %" },
+    { id: 'status', label: "Status" },
 ];
 
 /** Column definitions for the Products table — kept next to the page, not inside the generic DataTable. */
 export function useProductColumns({ sort, direction, onSort, selection, onAdjustStock, onDelete }: UseProductColumnsOptions) {
     const money = useMoneyFormat();
-    const { t } = useTranslation();
-
+    
     return useMemo<ColumnDef<ProductListItem>[]>(
         () => [
             {
@@ -89,14 +86,14 @@ export function useProductColumns({ sort, direction, onSort, selection, onAdjust
                 id: 'product',
                 header: () => (
                     <DataTableColumnHeader
-                        title={t('productColumns', 'product')}
+                        title={"Product"}
                         sortKey="name"
                         currentSort={sort}
                         currentDirection={direction}
                         onSort={onSort}
                     />
                 ),
-                meta: { label: t('productColumns', 'product') },
+                meta: { label: "Product" },
                 cell: ({ row }) => {
                     const product = row.original;
                     return (
@@ -112,8 +109,8 @@ export function useProductColumns({ sort, direction, onSort, selection, onAdjust
             },
             {
                 id: 'category',
-                header: t('productColumns', 'category_brand'),
-                meta: { label: t('productColumns', 'category_brand') },
+                header: "Category / Brand",
+                meta: { label: "Category / Brand" },
                 cell: ({ row }) => (
                     <div>
                         <div>{row.original.category?.name ?? '—'}</div>
@@ -125,7 +122,7 @@ export function useProductColumns({ sort, direction, onSort, selection, onAdjust
                 id: 'stock',
                 header: () => (
                     <DataTableColumnHeader
-                        title={t('productColumns', 'stock')}
+                        title={"Stock"}
                         sortKey="current_stock"
                         currentSort={sort}
                         currentDirection={direction}
@@ -133,14 +130,14 @@ export function useProductColumns({ sort, direction, onSort, selection, onAdjust
                         align="right"
                     />
                 ),
-                meta: { headerClassName: 'text-right', cellClassName: 'text-right tabular-nums', label: t('productColumns', 'stock') },
+                meta: { headerClassName: 'text-right', cellClassName: 'text-right tabular-nums', label: "Stock" },
                 cell: ({ row }) => <StockQuantity product={row.original} />,
             },
             {
                 id: 'pap',
                 header: () => (
                     <DataTableColumnHeader
-                        title={t('productColumns', 'pap')}
+                        title={"Purchase Average Price (P.A.P)"}
                         sortKey="avg_cost"
                         currentSort={sort}
                         currentDirection={direction}
@@ -148,20 +145,20 @@ export function useProductColumns({ sort, direction, onSort, selection, onAdjust
                         align="right"
                     />
                 ),
-                meta: { headerClassName: 'text-right', cellClassName: 'text-right tabular-nums', label: t('productColumns', 'pap') },
+                meta: { headerClassName: 'text-right', cellClassName: 'text-right tabular-nums', label: "Purchase Average Price (P.A.P)" },
                 cell: ({ row }) => money(row.original.avg_cost),
             },
             {
                 id: 'tpp',
-                header: t('productColumns', 'tpp'),
-                meta: { headerClassName: 'text-right', cellClassName: 'text-right tabular-nums', label: t('productColumns', 'tpp') },
+                header: "Total Purchase Price (T.P.P)",
+                meta: { headerClassName: 'text-right', cellClassName: 'text-right tabular-nums', label: "Total Purchase Price (T.P.P)" },
                 cell: ({ row }) => (row.original.manage_stock ? money(row.original.avg_cost * row.original.current_stock) : '—'),
             },
             {
                 id: 'price',
                 header: () => (
                     <DataTableColumnHeader
-                        title={t('productColumns', 'price')}
+                        title={"Selling Price"}
                         sortKey="selling_price"
                         currentSort={sort}
                         currentDirection={direction}
@@ -169,22 +166,22 @@ export function useProductColumns({ sort, direction, onSort, selection, onAdjust
                         align="right"
                     />
                 ),
-                meta: { headerClassName: 'text-right', cellClassName: 'text-right tabular-nums', label: t('productColumns', 'price') },
+                meta: { headerClassName: 'text-right', cellClassName: 'text-right tabular-nums', label: "Selling Price" },
                 cell: ({ row }) => money(row.original.selling_price),
             },
             {
                 id: 'margin',
-                header: t('productColumns', 'margin'),
-                meta: { headerClassName: 'text-right', cellClassName: 'text-right tabular-nums', label: t('productColumns', 'margin') },
+                header: "Margin",
+                meta: { headerClassName: 'text-right', cellClassName: 'text-right tabular-nums', label: "Margin" },
                 cell: ({ row }) => `${row.original.profit_margin}%`,
             },
             {
                 id: 'status',
-                header: t('productColumns', 'status'),
-                meta: { label: t('productColumns', 'status') },
+                header: "Status",
+                meta: { label: "Status" },
                 cell: ({ row }) => <ProductStatusBadge product={row.original} hideStockStatus />,
             },
         ],
-        [selection, onAdjustStock, onDelete, sort, direction, onSort, money, t],
+        [selection, onAdjustStock, onDelete, sort, direction, onSort, money],
     );
 }

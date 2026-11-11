@@ -5,7 +5,6 @@ import MoneyInput from '@/components/shared/money-input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useTranslation } from '@/hooks/use-translation';
 import { type ProductListItem } from '@/types/models';
 import { useForm } from '@inertiajs/react';
 import { FormEventHandler, useEffect, useState } from 'react';
@@ -22,8 +21,6 @@ interface StockAdjustmentModalProps {
  * serials of units that were found (AdjustSerialStockAction), so the serial list and the stock always stay equal.
  */
 export default function StockAdjustmentModal({ product, onOpenChange }: StockAdjustmentModalProps) {
-    const { t, locale } = useTranslation();
-    const bn = locale === 'bn';
     const tracksSerials = product?.track_serial_number === true;
     const needsCost = product ? product.avg_cost <= 0 : false;
     const [inStock, setInStock] = useState<string[]>([]);
@@ -90,7 +87,7 @@ export default function StockAdjustmentModal({ product, onOpenChange }: StockAdj
         form.post(route('stock-adjustments.store', product.id), {
             preserveScroll: true,
             onSuccess: () => {
-                toast.success(t('stockAdjustment', 'toast'));
+                toast.success("Stock adjusted.");
                 onOpenChange(false);
             },
         });
@@ -100,26 +97,24 @@ export default function StockAdjustmentModal({ product, onOpenChange }: StockAdj
         <FormModal
             open={product !== null}
             onOpenChange={onOpenChange}
-            title={`${t('stockAdjustment', 'title')} — ${product?.name ?? ''}`}
-            description={t('stockAdjustment', 'description')}
-            submitLabel={t('stockAdjustment', 'adjust')}
+            title={`${"Adjust Stock"} — ${product?.name ?? ''}`}
+            description={"Enter the actual counted quantity — the difference against current stock will be added as an adjustment"}
+            submitLabel={"Adjust"}
             processing={form.processing}
             onSubmit={submit}
         >
             {tracksSerials ? (
                 <div className="space-y-4">
                     <div className="space-y-2">
-                        <Label>{bn ? 'যে unit গুলো নেই (হারিয়েছে / নষ্ট)' : 'Units that are gone (lost / damaged)'}</Label>
+                        <Label>Units that are gone (lost / damaged)</Label>
                         <p className="text-muted-foreground text-xs">
-                            {bn
-                                ? 'In-stock serial থেকে বেছে নিন। বাছাই করা unit Written off হবে, stock সেই সংখ্যায় কমবে।'
-                                : 'Tick them from the in-stock serials. They become Written off and stock drops by that many.'}
-                            {product && ` (${t('stockAdjustment', 'current_stock')}: ${product.current_stock}, in-stock serials: ${inStock.length})`}
+                            Tick them from the in-stock serials. They become Written off and stock drops by that many.
+                            {product && ` (${"Current stock"}: ${product.current_stock}, in-stock serials: ${inStock.length})`}
                         </p>
                         <div className="max-h-44 space-y-1 overflow-y-auto rounded-md border p-2">
                             {loadingSerials && <p className="text-muted-foreground text-xs">…</p>}
                             {!loadingSerials && inStock.length === 0 && (
-                                <p className="text-muted-foreground text-xs">{bn ? 'কোনো in-stock serial নেই' : 'No in-stock serials'}</p>
+                                <p className="text-muted-foreground text-xs">No in-stock serials</p>
                             )}
                             {inStock.map((serial) => (
                                 <label key={serial} className="flex items-center gap-2 text-sm">
@@ -135,18 +130,16 @@ export default function StockAdjustmentModal({ product, onOpenChange }: StockAdj
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="add_serials">{bn ? 'যে unit পাওয়া গেছে (নতুন serial)' : 'Units that were found (new serials)'}</Label>
+                        <Label htmlFor="add_serials">Units that were found (new serials)</Label>
                         <Textarea
                             id="add_serials"
                             rows={3}
-                            placeholder={bn ? 'প্রতি লাইনে একটা serial' : 'One serial per line'}
+                            placeholder="One serial per line"
                             value={found}
                             onChange={(e) => setFound(e.target.value)}
                         />
                         <p className="text-muted-foreground text-xs">
-                            {bn
-                                ? 'এগুলো In stock হয়ে ঢুকবে, stock সেই সংখ্যায় বাড়বে।'
-                                : 'They enter stock as In stock and stock goes up by that many.'}
+                            They enter stock as In stock and stock goes up by that many.
                         </p>
                         <InputError message={form.errors.add_serials} />
                     </div>
@@ -157,7 +150,7 @@ export default function StockAdjustmentModal({ product, onOpenChange }: StockAdj
                         id="quantity"
                         label={
                             <>
-                                {t('stockAdjustment', 'actual_quantity')}{' '}
+                                {"Actual Quantity"}{' '}
                                 {product && <span className="text-muted-foreground">({product.unit.name})</span>}
                             </>
                         }
@@ -171,7 +164,7 @@ export default function StockAdjustmentModal({ product, onOpenChange }: StockAdj
                     />
                     {product && (
                         <p className="text-muted-foreground text-xs">
-                            {t('stockAdjustment', 'current_stock')}: {product.current_stock} {product.unit.name}
+                            {"Current stock"}: {product.current_stock} {product.unit.name}
                         </p>
                     )}
                 </div>
@@ -180,21 +173,21 @@ export default function StockAdjustmentModal({ product, onOpenChange }: StockAdj
             {needsCost && (
                 <div className="grid min-w-0 content-start gap-2">
                     <Label htmlFor="unit_cost" required={!tracksSerials}>
-                        {t('stockAdjustment', 'unit_cost')}
+                        {"Unit Cost / Purchase Price"}
                     </Label>
                     <MoneyInput id="unit_cost" value={form.data.unit_cost} onChange={(e) => form.setData('unit_cost', Number(e.target.value))} />
-                    <p className="text-muted-foreground text-xs">{t('stockAdjustment', 'unit_cost_hint')}</p>
+                    <p className="text-muted-foreground text-xs">{"Since this product has no previous purchase price, please enter unit cost."}</p>
                     <InputError message={form.errors.unit_cost} />
                 </div>
             )}
 
             <div className="grid min-w-0 content-start gap-2">
                 <Label htmlFor="reason" required>
-                    {t('stockAdjustment', 'reason')}
+                    {"Reason"}
                 </Label>
                 <Textarea
                     id="reason"
-                    placeholder={t('stockAdjustment', 'reason_placeholder')}
+                    placeholder={"damaged, count mismatch..."}
                     value={form.data.reason}
                     onChange={(e) => form.setData('reason', e.target.value)}
                 />

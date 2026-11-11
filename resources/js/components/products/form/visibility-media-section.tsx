@@ -2,7 +2,6 @@ import { FormSection } from '@/components/form/form-section';
 import { ToggleRow } from '@/components/form/toggle-row';
 import { ImageUploader } from '@/components/products/form/image-uploader';
 import { type ProductFormApi } from '@/components/products/form/types';
-import { useTranslation } from '@/hooks/use-translation';
 import { Eye } from 'lucide-react';
 
 interface VisibilityMediaSectionProps {
@@ -13,22 +12,21 @@ interface VisibilityMediaSectionProps {
 
 /** Whether the product is for sale / active, and its image. */
 export function VisibilityMediaSection({ form, savedImageUrl }: VisibilityMediaSectionProps) {
-    const { t } = useTranslation();
-
+    
     return (
-        <FormSection icon={Eye} title={t('productForm', 'visibility_media')} description="Product visibility, status এবং image" accent="amber">
+        <FormSection icon={Eye} title={"Visibility & Media"} description="Product visibility, status এবং image" accent="amber">
             <div className="grid gap-3">
                 <ToggleRow
                     id="is_for_sale"
-                    label={t('productForm', 'for_sale')}
-                    description={t('productForm', 'for_sale_description')}
+                    label={"For Sale (POS)"}
+                    description={"Whether this shows in POS"}
                     checked={form.data.is_for_sale}
                     onCheckedChange={(checked) => form.setData('is_for_sale', checked)}
                 />
                 <ToggleRow
                     id="is_active"
-                    label={t('productForm', 'active')}
-                    description={t('productForm', 'active_description')}
+                    label={"Active"}
+                    description={"When off, hidden everywhere"}
                     checked={form.data.is_active}
                     onCheckedChange={(checked) => form.setData('is_active', checked)}
                 />

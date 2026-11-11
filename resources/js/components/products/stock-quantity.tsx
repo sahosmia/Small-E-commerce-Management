@@ -1,4 +1,3 @@
-import { useTranslation } from '@/hooks/use-translation';
 import { cn } from '@/lib/utils';
 import { type StockStatus } from '@/types/models';
 
@@ -7,6 +6,12 @@ const stockQuantityColor: Record<StockStatus, string> = {
     in_stock: '',
     low_stock: 'font-semibold text-amber-600 dark:text-amber-400 print:text-amber-600',
     out_of_stock: 'font-semibold text-red-600 dark:text-red-400 print:text-red-600',
+};
+
+const stockStatusLabels: Record<StockStatus, string> = {
+    in_stock: 'In Stock',
+    low_stock: 'Low Stock',
+    out_of_stock: 'Out of Stock',
 };
 
 interface StockQuantityProps {
@@ -24,14 +29,12 @@ interface StockQuantityProps {
  * so the quantity itself carries the stock status instead of a separate badge.
  */
 export default function StockQuantity({ product, className }: StockQuantityProps) {
-    const { t } = useTranslation();
-
     if (!product.manage_stock) {
         return <span>—</span>;
     }
 
     return (
-        <span className={cn(stockQuantityColor[product.stock_status], className)} title={t('productList', product.stock_status)}>
+        <span className={cn(stockQuantityColor[product.stock_status], className)} title={stockStatusLabels[product.stock_status]}>
             {product.current_stock} {product.unit.name}
         </span>
     );

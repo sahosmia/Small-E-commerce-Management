@@ -3,7 +3,6 @@ import ConfirmDialog from '@/components/shared/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useTranslation } from '@/hooks/use-translation';
 import { type Category } from '@/types/models';
 import { router, useForm } from '@inertiajs/react';
 import { Pencil, Trash2, X } from 'lucide-react';
@@ -48,8 +47,7 @@ export default function LookupManagerModal({
     parentOptions,
     onCreated,
 }: LookupManagerModalProps) {
-    const { t } = useTranslation();
-    const [editingId, setEditingId] = useState<number | null>(null);
+        const [editingId, setEditingId] = useState<number | null>(null);
     const [deleting, setDeleting] = useState<LookupItem | null>(null);
 
     const createForm = useForm({ name: '', parent_id: null as number | null });
@@ -63,7 +61,7 @@ export default function LookupManagerModal({
         createForm.post(route(storeRouteName), {
             preserveScroll: true,
             onSuccess: () => {
-                toast.success(`"${name}" ${t('lookupManager', 'added_toast')}`);
+                toast.success(`"${name}" ${"added."}`);
                 createForm.reset();
                 onCreated?.(name);
             },
@@ -86,7 +84,7 @@ export default function LookupManagerModal({
         editForm.patch(route(updateRouteName, editingId), {
             preserveScroll: true,
             onSuccess: () => {
-                toast.success(t('lookupManager', 'saved_toast'));
+                toast.success("Saved.");
                 setEditingId(null);
             },
         });
@@ -101,8 +99,8 @@ export default function LookupManagerModal({
 
         router.delete(route(destroyRouteName, deleting.id), {
             preserveScroll: true,
-            onSuccess: () => toast.success(`"${name}" ${t('lookupManager', 'deleted_toast')}`),
-            onError: (errors) => toast.error(Object.values(errors)[0] ?? t('lookupManager', 'delete_error')),
+            onSuccess: () => toast.success(`"${name}" ${"deleted."}`),
+            onError: (errors) => toast.error(Object.values(errors)[0] ?? "Could not delete."),
             onFinish: () => setDeleting(null),
         });
     };
@@ -120,7 +118,7 @@ export default function LookupManagerModal({
                         <div className="flex-1">
                             <FormInput
                                 id="lookup-create-name"
-                                placeholder={t('lookupManager', 'new_name_placeholder')}
+                                placeholder={"Enter new name"}
                                 value={createForm.data.name}
                                 onChange={(e) => createForm.setData('name', e.target.value)}
                                 error={createForm.errors.name}
@@ -134,10 +132,10 @@ export default function LookupManagerModal({
                                 onValueChange={(value) => createForm.setData('parent_id', value === 'none' ? null : Number(value))}
                             >
                                 <SelectTrigger className="w-40">
-                                    <SelectValue placeholder={t('lookupManager', 'parent_placeholder')} />
+                                    <SelectValue placeholder={"Parent"} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="none">{t('lookupManager', 'no_parent')}</SelectItem>
+                                    <SelectItem value="none">{"No parent"}</SelectItem>
                                     {parentOptions.map((option) => (
                                         <SelectItem key={option.id} value={String(option.id)}>
                                             {option.name}
@@ -148,12 +146,12 @@ export default function LookupManagerModal({
                         )}
 
                         <Button type="submit" disabled={createForm.processing}>
-                            {createForm.processing ? t('lookupManager', 'adding') : t('lookupManager', 'add')}
+                            {createForm.processing ? "Adding..." : "Add"}
                         </Button>
                     </form>
 
                     <div className="max-h-72 space-y-1 overflow-y-auto">
-                        {items.length === 0 && <p className="text-muted-foreground py-4 text-center text-sm">{t('lookupManager', 'empty')}</p>}
+                        {items.length === 0 && <p className="text-muted-foreground py-4 text-center text-sm">{"Nothing added yet"}</p>}
 
                         {items.map((item) =>
                             editingId === item.id ? (
@@ -165,7 +163,7 @@ export default function LookupManagerModal({
                                         value={editForm.data.name}
                                         onChange={(e) => editForm.setData('name', e.target.value)}
                                         error={editForm.errors.name}
-                                        placeholder={t('lookupManager', 'new_name_placeholder')}
+                                        placeholder={"Enter new name"}
                                         required
                                     />
                                     {parentOptions && (
@@ -174,10 +172,10 @@ export default function LookupManagerModal({
                                             onValueChange={(value) => editForm.setData('parent_id', value === 'none' ? null : Number(value))}
                                         >
                                             <SelectTrigger className="w-40">
-                                                <SelectValue placeholder={t('lookupManager', 'parent_placeholder')} />
+                                                <SelectValue placeholder={"Parent"} />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="none">{t('lookupManager', 'no_parent')}</SelectItem>
+                                                <SelectItem value="none">{"No parent"}</SelectItem>
                                                 {parentOptions
                                                     .filter((option) => option.id !== item.id)
                                                     .map((option) => (
@@ -189,7 +187,7 @@ export default function LookupManagerModal({
                                         </Select>
                                     )}
                                     <Button type="submit" size="sm" disabled={editForm.processing}>
-                                        {editForm.processing ? t('common', 'saving') : t('common', 'save')}
+                                        {editForm.processing ? "Saving..." : "Save"}
                                     </Button>
                                     <Button type="button" variant="ghost" size="icon" onClick={() => setEditingId(null)}>
                                         <X className="size-4" />
@@ -216,9 +214,9 @@ export default function LookupManagerModal({
             <ConfirmDialog
                 open={deleting !== null}
                 onOpenChange={(open) => !open && setDeleting(null)}
-                title={`${t('lookupManager', 'delete_title')} "${deleting?.name}"?`}
-                description={t('lookupManager', 'delete_description')}
-                confirmLabel={t('common', 'delete')}
+                title={`${"Delete"} "${deleting?.name}"?`}
+                description={"Cannot be deleted if used by a product."}
+                confirmLabel={"Delete"}
                 onConfirm={confirmDelete}
             />
         </>

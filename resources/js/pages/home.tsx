@@ -126,75 +126,80 @@ export default function Home({ shops }: HomeProps) {
                 ) : (
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                         {filteredShops.map((shop) => (
-                            <Card
+                            <Link
                                 key={shop.id}
-                                className="group flex flex-col justify-between overflow-hidden border-border bg-card transition-all hover:shadow-md hover:border-primary/40"
+                                href={route('shops.public', shop.slug)}
+                                className="block h-full transition-transform hover:-translate-y-0.5 focus:outline-none"
                             >
-                                <CardHeader className="pb-3">
-                                    <div className="flex items-start justify-between gap-3">
-                                        <div className="flex items-center gap-3">
-                                            {shop.logo ? (
-                                                <img
-                                                    src={shop.logo}
-                                                    alt={shop.name}
-                                                    className="h-14 w-14 rounded-xl border border-border object-cover shadow-xs"
-                                                />
-                                            ) : (
-                                                <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-border bg-muted/60 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                                                    <Store className="h-7 w-7" />
+                                <Card
+                                    className="group flex h-full flex-col justify-between overflow-hidden border-border bg-card transition-all hover:shadow-md hover:border-primary/40 cursor-pointer"
+                                >
+                                    <CardHeader className="pb-3">
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="flex items-center gap-3">
+                                                {shop.logo ? (
+                                                    <img
+                                                        src={shop.logo}
+                                                        alt={shop.name}
+                                                        className="h-14 w-14 rounded-xl border border-border object-cover shadow-xs"
+                                                    />
+                                                ) : (
+                                                    <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-border bg-muted/60 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                                                        <Store className="h-7 w-7" />
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <CardTitle className="text-base font-bold group-hover:text-primary transition-colors">
+                                                        {shop.name}
+                                                    </CardTitle>
+                                                    <CardDescription className="font-mono text-xs text-muted-foreground mt-0.5">
+                                                        /{shop.slug}
+                                                    </CardDescription>
                                                 </div>
-                                            )}
-                                            <div>
-                                                <CardTitle className="text-base font-bold group-hover:text-primary transition-colors">
-                                                    {shop.name}
-                                                </CardTitle>
-                                                <CardDescription className="font-mono text-xs text-muted-foreground mt-0.5">
-                                                    /{shop.slug}
-                                                </CardDescription>
                                             </div>
+
+                                            {shop.status === 'active' ? (
+                                                <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 flex items-center gap-1 text-[11px]">
+                                                    <CheckCircle2 className="h-3 w-3" />
+                                                    Active
+                                                </Badge>
+                                            ) : (
+                                                <Badge className="bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-500/30 flex items-center gap-1 text-[11px]">
+                                                    <XCircle className="h-3 w-3" />
+                                                    {shop.status}
+                                                </Badge>
+                                            )}
+                                        </div>
+                                    </CardHeader>
+
+                                    <CardContent className="space-y-2.5 text-xs text-muted-foreground pt-1 pb-4">
+                                        <div className="flex items-center justify-between border-t border-border/60 pt-2.5">
+                                            <div className="flex items-center gap-1.5 text-foreground/80 font-medium">
+                                                <UserIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                                                <span>Owner</span>
+                                            </div>
+                                            <span className="font-medium text-foreground">
+                                                {shop.owner?.name ?? 'Merchant'}
+                                            </span>
                                         </div>
 
-                                        {shop.status === 'active' ? (
-                                            <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 flex items-center gap-1 text-[11px]">
-                                                <CheckCircle2 className="h-3 w-3" />
-                                                Active
-                                            </Badge>
-                                        ) : (
-                                            <Badge className="bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-500/30 flex items-center gap-1 text-[11px]">
-                                                <XCircle className="h-3 w-3" />
-                                                {shop.status}
-                                            </Badge>
-                                        )}
-                                    </div>
-                                </CardHeader>
-
-                                <CardContent className="space-y-2.5 text-xs text-muted-foreground pt-1 pb-4">
-                                    <div className="flex items-center justify-between border-t border-border/60 pt-2.5">
-                                        <div className="flex items-center gap-1.5 text-foreground/80 font-medium">
-                                            <UserIcon className="h-3.5 w-3.5 text-muted-foreground" />
-                                            <span>Owner</span>
+                                        <div className="flex items-center justify-between border-t border-border/60 pt-2">
+                                            <div className="flex items-center gap-1.5 text-foreground/80 font-medium">
+                                                <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                                                <span>Created Date</span>
+                                            </div>
+                                            <span>{shop.created_date}</span>
                                         </div>
-                                        <span className="font-medium text-foreground">
-                                            {shop.owner?.name ?? 'Merchant'}
-                                        </span>
-                                    </div>
+                                    </CardContent>
 
-                                    <div className="flex items-center justify-between border-t border-border/60 pt-2">
-                                        <div className="flex items-center gap-1.5 text-foreground/80 font-medium">
-                                            <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                                            <span>Created Date</span>
+                                    <CardFooter className="border-t border-border/60 bg-muted/20 px-6 py-3">
+                                        <div className="flex w-full items-center justify-between text-xs font-medium text-primary group-hover:underline">
+                                            <span>View Shop Details</span>
+                                            <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
                                         </div>
-                                        <span>{shop.created_date}</span>
-                                    </div>
-                                </CardContent>
-
-                                <CardFooter className="border-t border-border/60 bg-muted/20 px-6 py-3">
-                                    <div className="flex w-full items-center justify-between text-xs font-medium text-primary group-hover:underline">
-                                        <span>View Shop Details</span>
-                                        <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-                                    </div>
-                                </CardFooter>
-                            </Card>
+                                    </CardFooter>
+                                </Card>
+                            </Link>
                         ))}
                     </div>
                 )}

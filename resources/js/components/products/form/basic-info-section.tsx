@@ -5,7 +5,6 @@ import { type LookupKind, type ProductFormApi } from '@/components/products/form
 import SearchableSelect from '@/components/shared/searchable-select';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useTranslation } from '@/hooks/use-translation';
 import { type Brand, type Category, type Unit } from '@/types/models';
 import { Barcode, Hash, Package, Plus, Tag } from 'lucide-react';
 
@@ -19,15 +18,14 @@ interface BasicInfoSectionProps {
 
 /** Name, SKU, barcode and the category / brand / unit pickers (each with a "+" to create one on the spot). */
 export function BasicInfoSection({ form, categories, brands, units, onAddLookup }: BasicInfoSectionProps) {
-    const { t } = useTranslation();
-
+    
     return (
-        <FormSection icon={Package} title={t('productForm', 'basic_info')} description="Name, SKU, category, brand এবং unit" accent="sky">
+        <FormSection icon={Package} title={"Basic Info"} description="Name, SKU, category, brand এবং unit" accent="sky">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <div className="lg:col-span-2">
                     <FormInput
                         id="name"
-                        label={t('productForm', 'product_name')}
+                        label={"Product Name"}
                         value={form.data.name}
                         onChange={(e) => form.setData('name', e.target.value)}
                         error={form.errors.name}
@@ -39,8 +37,8 @@ export function BasicInfoSection({ form, categories, brands, units, onAddLookup 
 
                 <FormInput
                     id="sku"
-                    label={t('productForm', 'sku')}
-                    tooltip={t('productForm', 'sku_helper')}
+                    label={"SKU"}
+                    tooltip={"Leave blank to auto-generate one"}
                     value={form.data.sku}
                     onChange={(e) => form.setData('sku', e.target.value)}
                     error={form.errors.sku}
@@ -50,7 +48,7 @@ export function BasicInfoSection({ form, categories, brands, units, onAddLookup 
 
                 <FormInput
                     id="barcode"
-                    label={t('productForm', 'barcode')}
+                    label={"Barcode"}
                     value={form.data.barcode}
                     onChange={(e) => form.setData('barcode', e.target.value)}
                     error={form.errors.barcode}
@@ -58,7 +56,7 @@ export function BasicInfoSection({ form, categories, brands, units, onAddLookup 
                     icon={Barcode}
                 />
 
-                <FormField id="category_id" label={t('productForm', 'category')} error={form.errors.category_id}>
+                <FormField id="category_id" label={"Category"} error={form.errors.category_id}>
                     <div className="flex gap-2">
                         <SearchableSelect
                             id="category_id"
@@ -67,7 +65,7 @@ export function BasicInfoSection({ form, categories, brands, units, onAddLookup 
                             onChange={(category) => form.setData('category_id', category?.id ?? null)}
                             getLabel={(c) => c.name}
                             options={categories}
-                            placeholder={t('productForm', 'select_category')}
+                            placeholder={"Select a category"}
                             clearable
                         />
                         <Button type="button" variant="outline" size="icon" onClick={() => onAddLookup('category')} aria-label="Add category">
@@ -76,7 +74,7 @@ export function BasicInfoSection({ form, categories, brands, units, onAddLookup 
                     </div>
                 </FormField>
 
-                <FormField id="brand_id" label={t('productForm', 'brand')} error={form.errors.brand_id}>
+                <FormField id="brand_id" label={"Brand"} error={form.errors.brand_id}>
                     <div className="flex gap-2">
                         <SearchableSelect
                             id="brand_id"
@@ -85,7 +83,7 @@ export function BasicInfoSection({ form, categories, brands, units, onAddLookup 
                             onChange={(brand) => form.setData('brand_id', brand?.id ?? null)}
                             getLabel={(b) => b.name}
                             options={brands}
-                            placeholder={t('productForm', 'no_brand')}
+                            placeholder={"No brand"}
                             clearable
                         />
                         <Button type="button" variant="outline" size="icon" onClick={() => onAddLookup('brand')} aria-label="Add brand">
@@ -94,14 +92,14 @@ export function BasicInfoSection({ form, categories, brands, units, onAddLookup 
                     </div>
                 </FormField>
 
-                <FormField id="unit_id" label={t('productForm', 'unit')} required error={form.errors.unit_id}>
+                <FormField id="unit_id" label={"Unit"} required error={form.errors.unit_id}>
                     <div className="flex gap-2">
                         <Select
                             value={form.data.unit_id ? String(form.data.unit_id) : ''}
                             onValueChange={(value) => form.setData('unit_id', Number(value))}
                         >
                             <SelectTrigger id="unit_id" className="flex-1">
-                                <SelectValue placeholder={t('productForm', 'select_unit')} />
+                                <SelectValue placeholder={"Select a unit"} />
                             </SelectTrigger>
                             <SelectContent>
                                 {units.map((unit) => (
