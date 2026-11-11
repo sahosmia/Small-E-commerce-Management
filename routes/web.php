@@ -6,13 +6,7 @@ use App\Http\Controllers\GlobalSearchController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\Owner\MyShopController;
-use App\Http\Controllers\Products\BrandController;
-use App\Http\Controllers\Products\CategoryController;
 use App\Http\Controllers\Products\ProductController;
-use App\Http\Controllers\Products\ProductExportController;
-use App\Http\Controllers\Products\ProductSearchController;
-use App\Http\Controllers\Products\StockAdjustmentController;
-use App\Http\Controllers\Products\UnitController;
 use App\Http\Controllers\Shops\PublicShopController;
 use App\Http\Controllers\Shops\ShopController;
 use App\Http\Controllers\ThemeColorController;
@@ -45,17 +39,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('my-shop/edit', [MyShopController::class, 'edit'])->name('my-shop.edit');
     Route::put('my-shop', [MyShopController::class, 'update'])->name('my-shop.update');
 
-    // Products & Inventory
-    Route::resource('categories', CategoryController::class)->only(['index', 'store', 'update', 'destroy']);
-    Route::resource('units', UnitController::class)->only(['index', 'store', 'update', 'destroy']);
-    Route::resource('brands', BrandController::class)->only(['index', 'store', 'update', 'destroy']);
-
-    Route::get('products/export', ProductExportController::class)->name('products.export');
-    Route::get('products/search', ProductSearchController::class)->name('products.search');
+    // Products management
     Route::resource('products', ProductController::class);
-    Route::get('products/{product}/in-stock-serials', [StockAdjustmentController::class, 'serials'])->name('products.in-stock-serials');
-    Route::post('products/{product}/stock-adjustments', [StockAdjustmentController::class, 'store'])->name('stock-adjustments.store');
-    Route::post('products/bulk-delete', [ProductController::class, 'bulkDestroy'])->name('products.bulk-delete');
 
     // Global Search
     Route::get('global-search', GlobalSearchController::class)->name('global-search');
