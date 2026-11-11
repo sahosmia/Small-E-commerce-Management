@@ -30,8 +30,8 @@ class ProductController extends Controller
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('sku', 'like', "%{$search}%")
-                  ->orWhere('barcode', 'like', "%{$search}%");
+                    ->orWhere('sku', 'like', "%{$search}%")
+                    ->orWhere('barcode', 'like', "%{$search}%");
             });
         }
 
@@ -40,7 +40,7 @@ class ProductController extends Controller
                 $query->where('current_stock', '<=', 0);
             } elseif ($filters['stock_status'] === 'low_stock') {
                 $query->where('current_stock', '>', 0)
-                      ->whereColumn('current_stock', '<=', 'minimum_stock_level');
+                    ->whereColumn('current_stock', '<=', 'minimum_stock_level');
             } elseif ($filters['stock_status'] === 'in_stock') {
                 $query->whereColumn('current_stock', '>', 'minimum_stock_level');
             }

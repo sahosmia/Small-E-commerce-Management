@@ -5,11 +5,8 @@ namespace App\Models;
 use App\Models\Concerns\HasCreator;
 use App\Models\Concerns\LogsActivityDefaults;
 use Database\Factories\ProductFactory;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -34,7 +31,7 @@ class Product extends Model implements HasMedia
         'name',
         'sku',
         'base_price',
-        
+
         'is_active',
         'created_by',
     ];
@@ -45,16 +42,11 @@ class Product extends Model implements HasMedia
     protected function casts(): array
     {
         return [
-           
+
             'is_active' => 'boolean',
-           
+
         ];
     }
-
- 
-
-
-  
 
     /**
      * SKU is optional on the create form — an admin who doesn't care to pick
@@ -68,8 +60,6 @@ class Product extends Model implements HasMedia
 
         return $sku;
     }
-
-   
 
     /**
      * The photo's URL as a path on this site ("/storage/…"), not an absolute one built from APP_URL — so it still loads

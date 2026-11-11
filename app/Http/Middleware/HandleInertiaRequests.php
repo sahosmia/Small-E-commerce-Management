@@ -2,9 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use App\Enums\ThemeColor;
-use App\Models\Settings;
-use App\Services\SmsGateway;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;

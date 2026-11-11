@@ -88,7 +88,7 @@ export default function ProductsIndex({ products, stats, categories, brands, fil
 
                 <ListTable
                     selectionSlot={
-                        <BulkDeleteBar selection={list.selection} routeName="products.bulk-delete" noun="products" permission="product.delete" />
+                        <BulkDeleteBar selection={list.selection} routeName="products.bulk-delete" noun="products" />
                     }
                     list={list}
                     data={products}

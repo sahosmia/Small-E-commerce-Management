@@ -26,7 +26,6 @@ class StoreUserRequest extends FormRequest
             // numbers, underscore, dash, and dot.
             'username' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z0-9_.-]+$/', 'unique:users,username'],
             'password' => ['required', 'string', Password::defaults()],
-            'role' => ['required', 'string', 'exists:roles,name'],
             'is_active' => ['boolean'],
         ];
     }
