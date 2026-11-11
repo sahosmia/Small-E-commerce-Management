@@ -16,8 +16,10 @@ A modern Multi-Vendor E-commerce and POS platform built with **Laravel 12**, **R
   - Owners can customize pricing, description, and thumbnail specific to their store (`/owner/products`).
   - Owners can also create unique products directly for their store.
 - **Customer Storefront:**
-  - Public shop storefront accessible at `/shop/{slug}` and `/shops/{shop:slug}/products`.
-  - Only active products belonging to active shops are displayed to visitors.
+  - **Public Shop Profile:** `/shop/{slug}` (displays shop information, branding, banner, and contact details).
+  - **Shop Product Catalog:** `/shops/{shop:slug}/products` (displays all active products for the selected shop).
+  - **Product Detail:** `/shops/{shop:slug}/products/{product:slug}`.
+  - Only active products belonging to active shops and active shop owners are accessible to visitors.
 
 ### 2. Multi-Shop & Role Management
 - **Role-Based Access Control:**
@@ -40,9 +42,9 @@ A modern Multi-Vendor E-commerce and POS platform built with **Laravel 12**, **R
 - PHP 8.2 or higher
 - Composer
 - Node.js (v20+ or v22+) & npm
-- SQLite / MySQL
+- **MySQL 8.0+** (or MariaDB)
 
-### Installation
+### Installation & MySQL Database Setup
 
 1. **Clone the repository:**
    ```bash
@@ -50,34 +52,46 @@ A modern Multi-Vendor E-commerce and POS platform built with **Laravel 12**, **R
    cd Small-E-commerce-Management
    ```
 
-2. **Install PHP dependencies:**
+2. **Install dependencies:**
    ```bash
    composer install
-   ```
-
-3. **Install JavaScript dependencies:**
-   ```bash
    npm install
    ```
 
-4. **Environment Setup:**
+3. **Configure Environment for MySQL:**
+   Copy `.env.example` to `.env`:
    ```bash
    cp .env.example .env
    php artisan key:generate
    ```
 
-5. **Database Migration & Seeding:**
-   ```bash
-   touch database/database.sqlite
-   php artisan migrate --seed
+   Update the database configuration in your `.env` file to use MySQL:
+   ```dotenv
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=your_mysql_database_name
+   DB_USERNAME=your_mysql_username
+   DB_PASSWORD=your_mysql_password
    ```
 
-6. **Build Frontend Assets:**
+4. **Run Migrations and Database Seeders:**
+   Run migrations and seed the database with initial users, shops, and products:
+   ```bash
+   php artisan migrate --seed
+   ```
+   *(Or run them individually)*:
+   ```bash
+   php artisan migrate
+   php artisan db:seed
+   ```
+
+5. **Build Frontend Assets:**
    ```bash
    npm run build
    ```
 
-7. **Start the Laravel Application:**
+6. **Start the Laravel Server:**
    ```bash
    php artisan serve
    ```

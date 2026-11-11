@@ -59,7 +59,7 @@ export function buildEffectiveQuickActions(saved: QuickActionSetting[] | null | 
 }
 
 /** The actions the switcher should actually show this user. */
-export function resolveQuickActions(saved: QuickActionSetting[] | null | undefined, _permissions?: string[]): QuickActionDefinition[] {
+export function resolveQuickActions(saved: QuickActionSetting[] | null | undefined): QuickActionDefinition[] {
     return buildEffectiveQuickActions(saved)
         .filter((item) => item.enabled)
         .map((item) => QUICK_ACTIONS_BY_KEY.get(item.key))
