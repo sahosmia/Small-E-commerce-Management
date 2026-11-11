@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Users;
 
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -12,7 +13,20 @@ class UpdateUserRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        /** @var User $currentUser */
+        $currentUser = $this->user();
+        /** @var User $targetUser */
+        $targetUser = $this->route('user');
+
+        if (! $currentUser) {
+            return false;
+        }
+
+        if ($currentUser->isAdmin()) {
+            return true;
+        }
+
+        return $currentUser->id === $targetUser->id;
     }
 
     /**
@@ -20,17 +34,37 @@ class UpdateUserRequest extends FormRequest
      */
     public function rules(): array
     {
-        /** @var User $user */
-        $user = $this->route('user');
+        /** @var User $targetUser */
+        $targetUser = $this->route('user');
+        /** @var User $currentUser */
+        $currentUser = $this->user();
 
-        return [
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
-            // See StoreUserRequest — `alpha_dash` alone rejects a dotted username.
-            'username' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z0-9_.-]+$/', Rule::unique('users', 'username')->ignore($user->id)],
-            // Blank leaves the password unchanged — only validated/hashed when provided.
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($targetUser->id)],
+            'username' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z0-9_.-]+$/', Rule::unique('users', 'username')->ignore($targetUser->id)],
             'password' => ['nullable', 'string', Password::defaults()],
-            'is_active' => ['boolean'],
+        ];
+
+        if ($currentUser?->isAdmin()) {
+            $rules['role'] = ['nullable', Rule::enum(UserRole::class)];
+            $rules['is_active'] = ['nullable', 'boolean'];
+        } else {
+            $rules['role'] = ['prohibited'];
+            $rules['is_active'] = ['prohibited'];
+        }
+
+        return $rules;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'role.prohibited' => 'Shop owners cannot change user roles.',
+            'is_active.prohibited' => 'Shop owners cannot change user status.',
         ];
     }
 }

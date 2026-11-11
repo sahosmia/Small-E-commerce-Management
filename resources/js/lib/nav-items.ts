@@ -1,5 +1,5 @@
 import { type useTranslation } from '@/hooks/use-translation';
-import { type NavItem } from '@/types';
+import { type NavItem, type User } from '@/types';
 import {
     Banknote,
     BarChart3,
@@ -17,7 +17,13 @@ import {
     Wallet,
 } from 'lucide-react';
 
-export function buildMainNavItems(emiModuleEnabled: boolean, t: ReturnType<typeof useTranslation>['t']): NavItem[] {
+export function buildMainNavItems(
+    emiModuleEnabled: boolean,
+    t: ReturnType<typeof useTranslation>['t'],
+    user?: User | null
+): NavItem[] {
+    const isAdmin = user ? user.role === 1 : false;
+
     return [
         {
             key: 'dashboard',
@@ -35,8 +41,16 @@ export function buildMainNavItems(emiModuleEnabled: boolean, t: ReturnType<typeo
                 { key: 'create_shop', title: 'Create Shop', url: '/shops/create' },
             ],
         },
-        
-    
+        {
+            key: 'users',
+            title: t('nav', 'users'),
+            url: '/users',
+            icon: Users,
+            items: [
+                { key: 'all_users', title: 'All Users', url: '/users' },
+                ...(isAdmin ? [{ key: 'create_user', title: 'Create User', url: '/users/create' }] : []),
+            ],
+        },
         {
             key: 'product',
             title: t('nav', 'product'),

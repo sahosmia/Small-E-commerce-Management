@@ -11,7 +11,7 @@ import AppLogo from './app-logo';
 export function AppSidebar() {
     const { shop, auth } = usePage<SharedData>().props;
     const { t } = useTranslation();
-    const permittedNavItems = filterNavByPermission(buildMainNavItems(shop.emi_module_enabled, t), auth.permissions);
+    const permittedNavItems = filterNavByPermission(buildMainNavItems(shop.emi_module_enabled, t, auth?.user), auth.permissions);
     const mainNavItems = applyMenuOrder(permittedNavItems, shop.menu_order);
 
     return (

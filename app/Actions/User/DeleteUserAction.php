@@ -4,6 +4,7 @@ namespace App\Actions\User;
 
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class DeleteUserAction
 {
@@ -42,9 +43,13 @@ class DeleteUserAction
     private function hasRecordedActivity(User $user): bool
     {
         foreach (self::TABLES_WITH_CREATED_BY as $table) {
-            if (DB::table($table)->where('created_by', $user->id)->exists()) {
+            if (Schema::hasTable($table) && DB::table($table)->where('created_by', $user->id)->exists()) {
                 return true;
             }
+        }
+
+        if (Schema::hasTable('shops') && DB::table('shops')->where('user_id', $user->id)->exists()) {
+            return true;
         }
 
         return false;
