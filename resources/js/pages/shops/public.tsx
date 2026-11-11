@@ -15,6 +15,17 @@ import {
     Store,
 } from 'lucide-react';
 
+export interface PublicProductItem {
+    id: number;
+    product_id: number;
+    name: string;
+    slug: string;
+    sku: string;
+    price: number;
+    description: string | null;
+    thumbnail: string | null;
+}
+
 export interface PublicShopDetail {
     id: number;
     name: string;
@@ -28,12 +39,7 @@ export interface PublicShopDetail {
     city: string | null;
     country: string | null;
     status: string;
-    products: Array<{
-        id: number;
-        name: string;
-        price: number;
-        thumbnail: string | null;
-    }>;
+    products: PublicProductItem[];
 }
 
 interface PublicShopProps {
@@ -176,8 +182,19 @@ export default function PublicShop({ shop }: PublicShopProps) {
                         <div className="flex items-center justify-between">
                             <div>
                                 <h2 className="text-lg font-bold tracking-tight">Available Products</h2>
-                                <p className="text-xs text-muted-foreground">Browse catalog products offered by {shop.name}</p>
+                                <p className="text-xs text-muted-foreground">
+                                    Browse catalog products offered by {shop.name} ({shop.products.length} {shop.products.length === 1 ? 'item' : 'items'})
+                                </p>
                             </div>
+
+                            {shop.products.length > 0 && (
+                                <Link
+                                    href={route('customer.shops.products.index', shop.slug)}
+                                    className="text-xs font-semibold text-primary hover:underline"
+                                >
+                                    Browse Storefront &rarr;
+                                </Link>
+                            )}
                         </div>
 
                         {shop.products.length === 0 ? (
@@ -191,27 +208,38 @@ export default function PublicShop({ shop }: PublicShopProps) {
                         ) : (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {shop.products.map((product) => (
-                                    <Card key={product.id} className="border-border overflow-hidden">
-                                        <CardContent className="p-4 flex items-center gap-4">
-                                            {product.thumbnail ? (
-                                                <img
-                                                    src={product.thumbnail}
-                                                    alt={product.name}
-                                                    className="h-16 w-16 rounded-xl object-cover border border-border"
-                                                />
-                                            ) : (
-                                                <div className="h-16 w-16 rounded-xl bg-muted flex items-center justify-center text-muted-foreground">
-                                                    <Package className="h-8 w-8" />
+                                    <Link
+                                        key={product.id}
+                                        href={route('customer.shops.products.show', [shop.slug, product.slug])}
+                                        className="group block"
+                                    >
+                                        <Card className="h-full border-border overflow-hidden transition-all hover:border-primary/50 hover:shadow-sm">
+                                            <CardContent className="p-4 flex items-center gap-4">
+                                                {product.thumbnail ? (
+                                                    <img
+                                                        src={product.thumbnail}
+                                                        alt={product.name}
+                                                        className="h-16 w-16 shrink-0 rounded-xl object-cover border border-border group-hover:scale-105 transition duration-200"
+                                                    />
+                                                ) : (
+                                                    <div className="h-16 w-16 shrink-0 rounded-xl bg-muted flex items-center justify-center text-muted-foreground">
+                                                        <Package className="h-8 w-8" />
+                                                    </div>
+                                                )}
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="text-[10px] font-mono text-muted-foreground truncate">
+                                                        {product.sku}
+                                                    </div>
+                                                    <h4 className="font-semibold text-sm truncate group-hover:text-primary transition-colors">
+                                                        {product.name}
+                                                    </h4>
+                                                    <p className="text-sm font-bold text-foreground mt-1">
+                                                        ৳{Number(product.price).toLocaleString()}
+                                                    </p>
                                                 </div>
-                                            )}
-                                            <div>
-                                                <h4 className="font-semibold text-sm">{product.name}</h4>
-                                                <p className="text-xs text-primary font-bold mt-1">
-                                                    ${product.price.toFixed(2)}
-                                                </p>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
+                                            </CardContent>
+                                        </Card>
+                                    </Link>
                                 ))}
                             </div>
                         )}

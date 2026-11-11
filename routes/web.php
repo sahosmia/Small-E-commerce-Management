@@ -31,7 +31,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('my-shop/edit', [MyShopController::class, 'edit'])->name('my-shop.edit');
     Route::put('my-shop', [MyShopController::class, 'update'])->name('my-shop.update');
 
-
 });
 
 require __DIR__.'/inventory.php';

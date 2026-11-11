@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Shops;
 
 use App\Http\Controllers\Controller;
 use App\Models\Shop;
+use App\Models\ShopProduct;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -19,6 +20,26 @@ class PublicShopController extends Controller
             ->where('status', 'active')
             ->firstOrFail();
 
+        $products = ShopProduct::query()
+            ->with('product')
+            ->where('shop_id', $shop->id)
+            ->where('status', true)
+            ->whereHas('product', function ($q) {
+                $q->where('is_active', true);
+            })
+            ->latest('id')
+            ->get()
+            ->map(fn (ShopProduct $sp) => [
+                'id' => $sp->id,
+                'product_id' => $sp->product_id,
+                'name' => $sp->product->name,
+                'slug' => $sp->product->slug,
+                'sku' => $sp->product->sku,
+                'price' => (float) $sp->price,
+                'description' => $sp->effective_description,
+                'thumbnail' => $sp->effectiveThumbnailUrl(),
+            ]);
+
         return Inertia::render('shops/public', [
             'shop' => [
                 'id' => $shop->id,
@@ -33,7 +54,7 @@ class PublicShopController extends Controller
                 'city' => $shop->city,
                 'country' => $shop->country,
                 'status' => $shop->status,
-                'products' => [],
+                'products' => $products,
             ],
         ]);
     }
