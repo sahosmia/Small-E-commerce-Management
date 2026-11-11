@@ -23,12 +23,12 @@ class ProductFactory extends Factory
 
         return [
             'created_by' => User::factory(),
-            'name' => ucfirst($name),
-            'slug' => Str::slug($name).'-'.fake()->unique()->numberBetween(100, 9999),
-            'sku' => fake()->unique()->bothify('SKU-#####'),
-            'description' => fake()->sentence(),
-            'base_price' => fake()->randomFloat(2, 50, 1000),
-            'image' => null,
+            'name' => $name,
+            'slug' => Str::slug($name),
+            'sku' => 'SKU-'.strtoupper(fake()->unique()->bothify('??####')),
+            'description' => fake()->paragraph(),
+            'base_price' => fake()->randomFloat(2, 50, 5000),
+            'thumbnail' => null,
             'is_active' => true,
         ];
     }

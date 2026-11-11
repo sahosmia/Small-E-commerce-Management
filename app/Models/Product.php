@@ -2,34 +2,31 @@
 
 namespace App\Models;
 
-use App\Models\Concerns\HasCreator;
-use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 class Product extends Model
 {
-    use HasCreator;
-
-    /** @use HasFactory<ProductFactory> */
     use HasFactory;
-
     use SoftDeletes;
 
     /**
      * @var list<string>
      */
     protected $fillable = [
+        'created_by',
         'name',
         'slug',
         'sku',
         'description',
         'base_price',
-        'image',
+        'thumbnail',
         'is_active',
-        'created_by',
     ];
 
     /**
@@ -44,7 +41,49 @@ class Product extends Model
     }
 
     /**
-     * SKU generator helper.
+     * @return BelongsTo<User, $this>
+     */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * @return HasMany<ShopProduct, $this>
+     */
+    public function shopProducts(): HasMany
+    {
+        return $this->hasMany(ShopProduct::class);
+    }
+
+    /**
+     * @return BelongsToMany<Shop, $this>
+     */
+    public function shops(): BelongsToMany
+    {
+        return $this->belongsToMany(Shop::class, 'shop_products')
+            ->withPivot(['id', 'price', 'description', 'thumbnail', 'status'])
+            ->withTimestamps();
+    }
+
+    /**
+     * Helper to get thumbnail URL.
+     */
+    public function thumbnailUrl(): ?string
+    {
+        if (! $this->thumbnail) {
+            return null;
+        }
+
+        if (str_starts_with($this->thumbnail, 'http://') || str_starts_with($this->thumbnail, 'https://')) {
+            return $this->thumbnail;
+        }
+
+        return '/storage/'.$this->thumbnail;
+    }
+
+    /**
+     * Generate unique SKU.
      */
     public static function generateUniqueSku(): string
     {
@@ -56,7 +95,7 @@ class Product extends Model
     }
 
     /**
-     * Slug generator helper.
+     * Generate unique slug from name.
      */
     public static function generateUniqueSlug(string $name, ?int $ignoreId = null): string
     {
@@ -73,21 +112,5 @@ class Product extends Model
         }
 
         return $slug;
-    }
-
-    /**
-     * Product image URL helper stored in products table.
-     */
-    public function imageUrl(): ?string
-    {
-        if (! $this->image) {
-            return null;
-        }
-
-        if (str_starts_with($this->image, 'http://') || str_starts_with($this->image, 'https://')) {
-            return $this->image;
-        }
-
-        return '/storage/'.$this->image;
     }
 }

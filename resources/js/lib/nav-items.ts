@@ -41,16 +41,40 @@ export function buildMainNavItems(
                 ...(isAdmin ? [{ key: 'create_user', title: 'Create User', url: '/users/create' }] : []),
             ],
         },
-        {
-            key: 'product',
-            title: t('nav', 'product'),
-            url: '/products',
-            icon: Package,
-            items: [
-                { key: 'products', title: t('nav', 'products'), url: '/products' },
-                { key: 'add_product', title: t('nav', 'add_product'), url: '/products/create' },
-            ],
-        },
+        ...(isAdmin
+            ? [
+                  {
+                      key: 'product',
+                      title: 'Global Products',
+                      url: '/admin/products',
+                      icon: Package,
+                      items: [
+                          { key: 'products', title: 'All Products', url: '/admin/products' },
+                          { key: 'add_product', title: 'Create Product', url: '/admin/products/create' },
+                      ],
+                  },
+              ]
+            : [
+                  {
+                      key: 'catalog',
+                      title: 'Shared Catalog',
+                      url: '/owner/catalog',
+                      icon: Package,
+                      items: [
+                          { key: 'catalog_browse', title: 'Browse Catalog', url: '/owner/catalog' },
+                      ],
+                  },
+                  {
+                      key: 'my_products',
+                      title: 'My Products',
+                      url: '/owner/products',
+                      icon: Store,
+                      items: [
+                          { key: 'all_my_products', title: 'My Products', url: '/owner/products' },
+                          { key: 'create_my_product', title: 'Add New Product', url: '/owner/products/create' },
+                      ],
+                  },
+              ]),
     ];
 }
 
