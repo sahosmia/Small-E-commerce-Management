@@ -1,20 +1,10 @@
 import { type useTranslation } from '@/hooks/use-translation';
 import { type NavItem, type User } from '@/types';
 import {
-    Banknote,
-    BarChart3,
-    BookText,
-    HandCoins,
-    KeyRound,
-    Landmark,
     LayoutGrid,
     Package,
-    Receipt,
-    Settings,
-    ShoppingCart,
     Store,
     Users,
-    Wallet,
 } from 'lucide-react';
 
 export function buildMainNavItems(
@@ -59,9 +49,6 @@ export function buildMainNavItems(
             items: [
                 { key: 'products', title: t('nav', 'products'), url: '/products' },
                 { key: 'add_product', title: t('nav', 'add_product'), url: '/products/create' },
-                { key: 'category', title: t('nav', 'category'), url: '/categories' },
-                { key: 'unit', title: t('nav', 'unit'), url: '/units' },
-                { key: 'brand', title: t('nav', 'brand'), url: '/brands' },
             ],
         },
     ];

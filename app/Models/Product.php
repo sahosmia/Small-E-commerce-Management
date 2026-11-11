@@ -3,35 +3,31 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasCreator;
-use App\Models\Concerns\LogsActivityDefaults;
 use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Product extends Model implements HasMedia
+class Product extends Model
 {
     use HasCreator;
 
     /** @use HasFactory<ProductFactory> */
     use HasFactory;
 
-    use InteractsWithMedia;
-    use LogsActivityDefaults;
+    use SoftDeletes;
 
     /**
-     * `avg_cost` and `current_stock` are deliberately not fillable — they
-     * may only change through StockService, alongside a stock_movements row.
-     *
      * @var list<string>
      */
     protected $fillable = [
         'name',
+        'slug',
         'sku',
+        'description',
         'base_price',
-
+        'image',
         'is_active',
         'created_by',
     ];
@@ -42,15 +38,13 @@ class Product extends Model implements HasMedia
     protected function casts(): array
     {
         return [
-
+            'base_price' => 'decimal:2',
             'is_active' => 'boolean',
-
         ];
     }
 
     /**
-     * SKU is optional on the create form — an admin who doesn't care to pick
-     * one yet gets a short, unique placeholder instead of a blank/duplicate value.
+     * SKU generator helper.
      */
     public static function generateUniqueSku(): string
     {
@@ -62,24 +56,38 @@ class Product extends Model implements HasMedia
     }
 
     /**
-     * The photo's URL as a path on this site ("/storage/…"), not an absolute one built from APP_URL — so it still loads
-     * when the app is opened on a different host or port than APP_URL says (localhost vs 127.0.0.1, a vhost, a LAN IP).
+     * Slug generator helper.
      */
-    public function imageUrl(): ?string
+    public static function generateUniqueSlug(string $name, ?int $ignoreId = null): string
     {
-        $url = $this->getFirstMediaUrl('images');
+        $baseSlug = Str::slug($name);
+        $slug = $baseSlug;
+        $count = 1;
 
-        return $url === '' ? null : (parse_url($url, PHP_URL_PATH) ?: null);
+        while (static::query()
+            ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
+            ->where('slug', $slug)
+            ->exists()) {
+            $slug = "{$baseSlug}-{$count}";
+            $count++;
+        }
+
+        return $slug;
     }
 
     /**
-     * A single product photo — no custom column, just the package's
-     * polymorphic `media` table.
+     * Product image URL helper stored in products table.
      */
-    public function registerMediaCollections(): void
+    public function imageUrl(): ?string
     {
-        $this->addMediaCollection('images')
-            ->singleFile()
-            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
+        if (! $this->image) {
+            return null;
+        }
+
+        if (str_starts_with($this->image, 'http://') || str_starts_with($this->image, 'https://')) {
+            return $this->image;
+        }
+
+        return '/storage/'.$this->image;
     }
 }

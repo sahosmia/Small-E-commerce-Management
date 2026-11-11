@@ -37,7 +37,7 @@ test('a guest can view active shops on the home page', function () {
 });
 
 test('authenticated user can view shops index page', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->admin()->create();
 
     $response = $this->actingAs($user)->get('/shops');
 
@@ -46,7 +46,7 @@ test('authenticated user can view shops index page', function () {
 });
 
 test('authenticated user can view create shop page', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->admin()->create();
 
     $response = $this->actingAs($user)->get('/shops/create');
 
@@ -57,7 +57,7 @@ test('authenticated user can view create shop page', function () {
 test('authenticated user can create a shop with logo, name, slug, owner, and status', function () {
     Storage::fake('public');
 
-    $user = User::factory()->create();
+    $user = User::factory()->admin()->create();
     $owner = User::factory()->create();
 
     $file = UploadedFile::fake()->image('shop_logo.png');
@@ -83,7 +83,7 @@ test('authenticated user can create a shop with logo, name, slug, owner, and sta
 });
 
 test('shop creation requires unique slug and valid fields', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->admin()->create();
 
     Shop::create([
         'name' => 'Existing Shop',
@@ -103,7 +103,7 @@ test('shop creation requires unique slug and valid fields', function () {
 });
 
 test('authenticated user can update a shop', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->admin()->create();
     $shop = Shop::create([
         'name' => 'Old Name',
         'slug' => 'old-name',
@@ -127,7 +127,7 @@ test('authenticated user can update a shop', function () {
 });
 
 test('authenticated user can delete a shop', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->admin()->create();
     $shop = Shop::create([
         'name' => 'To Delete',
         'slug' => 'to-delete',
