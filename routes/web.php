@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\Shops\ShopController;
 use App\Http\Controllers\ThemeColorController;
+use App\Http\Controllers\Users\UserController;
 use App\Models\Shop;
 use Illuminate\Support\Facades\Route;
 
@@ -42,6 +43,7 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('appearance', [AppearanceController::class, 'update'])->name('appearance.update');
 
     Route::resource('shops', ShopController::class);
+    Route::resource('users', UserController::class);
 });
 
 require __DIR__.'/inventory.php';

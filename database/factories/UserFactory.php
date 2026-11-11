@@ -30,6 +30,8 @@ class UserFactory extends Factory
             'username' => fake()->unique()->userName(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
+            'role' => User::ROLE_SHOP_OWNER,
+            'is_active' => true,
             'remember_token' => Str::random(10),
         ];
     }
@@ -48,6 +50,20 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'is_active' => false,
+        ]);
+    }
+
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => User::ROLE_ADMIN,
+        ]);
+    }
+
+    public function shopOwner(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => User::ROLE_SHOP_OWNER,
         ]);
     }
 }

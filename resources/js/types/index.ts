@@ -70,6 +70,8 @@ export interface User {
     name: string;
     email: string;
     username?: string | null;
+    role?: number;
+    is_active?: boolean;
     avatar?: string;
     /** UI language preference (Phase 33 §4) — 'en' or 'bn', default 'en'. */
     locale: string;

@@ -2,15 +2,17 @@
 
 namespace App\Http\Requests\Users;
 
+use App\Enums\UserRole;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 class StoreUserRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->isAdmin() ?? false;
     }
 
     /**
@@ -21,12 +23,10 @@ class StoreUserRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            // `alpha_dash` alone rejects a dotted username (e.g. "john.doe"), a
-            // completely normal real-world pattern — this allows letters,
-            // numbers, underscore, dash, and dot.
             'username' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z0-9_.-]+$/', 'unique:users,username'],
             'password' => ['required', 'string', Password::defaults()],
-            'is_active' => ['boolean'],
+            'role' => ['nullable', Rule::enum(UserRole::class)],
+            'is_active' => ['nullable', 'boolean'],
         ];
     }
 }

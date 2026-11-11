@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -11,6 +12,10 @@ class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
+    public const ROLE_ADMIN = 1;
+
+    public const ROLE_SHOP_OWNER = 2;
 
     /**
      * @var list<string>
@@ -41,6 +46,17 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'role' => UserRole::class,
         ];
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === UserRole::Admin || (int) ($this->role?->value ?? $this->role) === self::ROLE_ADMIN;
+    }
+
+    public function isShopOwner(): bool
+    {
+        return $this->role === UserRole::ShopOwner || (int) ($this->role?->value ?? $this->role) === self::ROLE_SHOP_OWNER;
     }
 }
